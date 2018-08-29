@@ -62,7 +62,7 @@ class MyTNSParticleDevice implements TNSParticleDevice {
   }
 
   getVariable(name: string): Promise<any> {
-    return new Promise((resolve, reject) => {
+    return new Promise<any>((resolve, reject) => {
       this.nativeDevice.getVariableCompletion(
           name,
           (result, error) => error ? reject(error.localizedDescription) : resolve(result));
@@ -70,7 +70,7 @@ class MyTNSParticleDevice implements TNSParticleDevice {
   }
 
   callFunction(name: string, ...args): Promise<number> {
-    return new Promise((resolve, reject) => {
+    return new Promise<number>((resolve, reject) => {
       try {
         this.nativeDevice.callFunctionWithArgumentsCompletion(
             name,
@@ -86,7 +86,7 @@ class MyTNSParticleDevice implements TNSParticleDevice {
 export class Particle implements TNSParticleAPI {
 
   public login(options: TNSParticleLoginOptions): Promise<void> {
-    return new Promise((resolve, reject) => {
+    return new Promise<void>((resolve, reject) => {
       try {
         ParticleCloud.sharedInstance().loginWithUserPasswordCompletion(
             options.username,
@@ -103,7 +103,7 @@ export class Particle implements TNSParticleAPI {
   }
 
   public listDevices(): Promise<Array<TNSParticleDevice>> {
-    return new Promise((resolve, reject) => {
+    return new Promise<Array<TNSParticleDevice>>((resolve, reject) => {
       ParticleCloud.sharedInstance().getDevices((particleDevices: NSArray<ParticleDevice>, error: NSError) => {
         if (error) {
           reject(error.localizedDescription);

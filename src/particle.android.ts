@@ -21,7 +21,7 @@ export class Particle implements TNSParticleAPI {
       worker = new Worker("./particle-worker.js");
     }
 
-    return new Promise((resolve, reject) => {
+    return new Promise<void>((resolve, reject) => {
       worker.postMessage({
         action: "login",
         options
@@ -38,7 +38,7 @@ export class Particle implements TNSParticleAPI {
   }
 
   public listDevices(): Promise<Array<TNSParticleDevice>> {
-    return new Promise((resolve, reject) => {
+    return new Promise<Array<TNSParticleDevice>>((resolve, reject) => {
       worker.postMessage({
         action: "listDevices"
       });
@@ -46,7 +46,7 @@ export class Particle implements TNSParticleAPI {
       worker.onmessage = msg => {
         if (msg.data.success) {
           const devices: Array<TNSParticleDevice> = msg.data.devices;
-          // since the worker strips the functions we're adding 'em back here as proxies those implemented in the worker
+          // since the worker strips the functions, we're adding 'em back here as proxies to those implemented in the worker
           devices.map(device => {
             device.callFunction = (name: string, args): Promise<number> => this.callFunction(device.id, name, args);
             device.getVariable = (name: string): Promise<any> => this.getVariable(device.id, name);
