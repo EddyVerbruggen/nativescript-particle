@@ -36,6 +36,8 @@ npm i
 npm run demo.ios # or demo.android
 ``` 
 
+Want to see it in action? Check out [this short video 📺](https://www.youtube.com/watch?v=c49mXdduyMo).
+
 > Tip: If you get tired entering your login credentials every time you log in, set the [`PARTICLE_USERNAME` and `PARTICLE_PASSWORD` properties to reflect your own](https://github.com/EddyVerbruggen/nativescript-particle/blob/618dea7d0a5d3c1cd9cb287e70142375547faa60/demo/app/main-view-model.ts#L7-L8).
 
 ## API
