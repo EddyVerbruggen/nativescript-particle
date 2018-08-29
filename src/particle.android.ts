@@ -14,7 +14,13 @@ export class Particle implements TNSParticleAPI {
   }
 
   public login(options: TNSParticleLoginOptions): Promise<void> {
-    worker = new Worker("./particle-worker");
+    if (global["TNS_WEBPACK"]) {
+      const WorkerScript = require("nativescript-worker-loader!./particle-worker.js");
+      worker = new WorkerScript();
+    } else {
+      worker = new Worker("./particle-worker.js");
+    }
+
     return new Promise((resolve, reject) => {
       worker.postMessage({
         action: "login",
