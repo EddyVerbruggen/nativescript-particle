@@ -1,0 +1,42 @@
+﻿@import '~nativescript-theme-core/css/core.light.css';
+
+.btn {
+  padding: 6 16;
+}
+
+.message {
+  text-align: center;
+  margin: 10 0;
+  padding: 6 16;
+  color: #ffffff;
+  background-color: #cccccc;
+  border-radius: 50%;
+}
+
+.device-id {
+  font-size: 13;
+  color: #aaaaaa;
+}
+
+.device-name {
+  font-size: 16;
+  font-weight: bold;
+  color: #333333;
+}
+
+.function-name,
+.variable-name {
+  font-size: 14;
+  color: #333333;
+}
+
+.device-type,
+.variable-type {
+  font-size: 11;
+  color: #ffffff;
+  padding: 2 5;
+  background-color: #cccccc;
+  border-radius: 50%;
+  margin-left: 6;
+  vertical-align: center;
+}

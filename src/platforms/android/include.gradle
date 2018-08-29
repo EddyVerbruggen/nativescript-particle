@@ -1,0 +1,17 @@
+android {
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+}
+
+dependencies {
+    compile "com.squareup.retrofit:retrofit:1.9.0"
+    compile "org.greenrobot:eventbus:3.0.0"
+    compile "com.squareup.okhttp:okhttp:2.7.5"
+    compile "com.google.code.gson:gson:2.8.2"
+
+    compile("io.particle:cloudsdk:0.5.1") {
+        transitive = false
+    }
+}

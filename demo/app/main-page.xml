@@ -1,0 +1,46 @@
+<Page xmlns="http://schemas.nativescript.org/tns.xsd" loaded="pageLoaded" class="page">
+  <StackLayout class="p-15">
+    <Image margin="10" src="~/images/particle-logo.png" width="50%"/>
+
+    <Button tap="{{ login }}" text="Log in" class="btn" visibility="{{ !loggedIn ? 'visible' : 'collapsed' }}"/>
+
+    <StackLayout orientation="horizontal" horizontalAlignment="center" visibility="{{ loggedIn ? 'visible' : 'collapsed' }}">
+      <Button tap="{{ logout }}" text="Log out" class="btn"/>
+      <Button tap="{{ listDevices }}" text="List devices" class="btn"/>
+    </StackLayout>
+
+    <Label text="{{ message }}" class="message" textWrap="true"/>
+
+    <ListView separatorColor="transparent" rowHeight="60" width="95%" class="m-15" items="{{ devices }}" itemTap="{{ onDeviceTap }}" horizontalAlignment="center" visibility="{{ !selectedDevice ? 'visible' : 'collapsed' }}">
+      <ListView.itemTemplate>
+        <StackLayout backgroundColor="#eee" class="p-10 m-2">
+          <StackLayout orientation="horizontal" class="m-b-4">
+            <Label text="{{ name }}" class="device-name"/>
+            <Label text="{{ type }}" class="device-type"/>
+          </StackLayout>
+          <Label text="{{ id }}" class="device-id"/>
+        </StackLayout>
+      </ListView.itemTemplate>
+    </ListView>
+
+    <GridLayout rows="auto, *" columns="*, 5, *" class="m-t-10" visibility="{{ selectedDevice ? 'visible' : 'collapsed' }}">
+      <Label row="0" col="0" text="Functions" horizontalAlignment="center"/>
+      <Label row="0" col="2" text="Variables" horizontalAlignment="center"/>
+      <ListView row="1" col="0" separatorColor="transparent" rowHeight="32" width="100%" class="m-5" items="{{ selectedDevice ? selectedDevice.functions : [] }}" itemTap="{{ onFunctionTap }}" horizontalAlignment="center">
+        <ListView.itemTemplate>
+          <StackLayout backgroundColor="#eee" class="p-5 m-2">
+            <Label text="{{ $value }}" class="function-name"/>
+          </StackLayout>
+        </ListView.itemTemplate>
+      </ListView>
+      <ListView row="1" col="2" separatorColor="transparent" rowHeight="32" width="100%" class="m-5" items="{{ selectedDevice ? selectedDevice.variables : [] }}" itemTap="{{ onVariableTap }}" horizontalAlignment="center">
+        <ListView.itemTemplate>
+          <GridLayout columns="*, auto"  backgroundColor="#eee" class="p-5 m-2">
+            <Label col="0" text="{{ name }}" class="variable-name"/>
+            <Label col="1" text="{{ type }}" class="variable-type"/>
+          </GridLayout>
+        </ListView.itemTemplate>
+      </ListView>
+    </GridLayout>
+  </StackLayout>
+</Page>
