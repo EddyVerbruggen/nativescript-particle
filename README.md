@@ -1,7 +1,5 @@
 # NativeScript Particle plugin
 
-> Control your [Particle.io](https://particle.io) devices from a NativeScript app!
-
 [![NPM version][npm-image]][npm-url]
 [![Downloads][downloads-image]][npm-url]
 [![Twitter Follow][twitter-image]][twitter-url]
@@ -14,12 +12,12 @@
 [twitter-image]:https://img.shields.io/twitter/follow/eddyverbruggen.svg?style=social&label=Follow%20me
 [twitter-url]:https://twitter.com/eddyverbruggen
 
-<img src="demo/app/images/particle-logo.png" width="250px" alt="Particle.io logo"/><br/>
+<img src="https://github.com/EddyVerbruggen/nativescript-particle/raw/master/demo/app/images/particle-logo.png" width="250px" alt="Particle.io logo"/><br/>
 
 ## Prerequisites
 Hop on over to [the Particle.io store](https://store.particle.io) and order any of their cool devices.
 
-While developing this plugin and the [demo app](demo/) I used a [Photon Kit](https://store.particle.io/collections/photon) and it was a joy to work with (thanks, [Brandon Satrom](https://twitter.com/BrandonSatrom) for sending one over!).
+> While developing this plugin and the [demo app](demo/) I used a [Photon Kit](https://store.particle.io/collections/photon) and it was a joy to work with (thanks, [Brandon Satrom](https://twitter.com/BrandonSatrom) for sending one over)!
 
 ## Installation
 ```bash
@@ -34,10 +32,10 @@ follow these steps to install the demo app I've created with NativeScript Core:
 git clone https://github.com/EddyVerbruggen/nativescript-particle
 cd nativescript-particle/src
 npm i
-npm run demo.ios   # or demo.android
+npm run demo.ios # or demo.android
 ``` 
 
-> Tip: If you get fed up by entering your login credentials every time, set the `PARTICLE_USERNAME` and `PARTICLE_PASSWORD` properties to reflect your own, at `demo/app/main-view-modal.ts`.
+> Tip: If you get tired entering your login credentials every time you log in, set the [`PARTICLE_USERNAME` and `PARTICLE_PASSWORD` properties to reflect your own](https://github.com/EddyVerbruggen/nativescript-particle/blob/618dea7d0a5d3c1cd9cb287e70142375547faa60/demo/app/main-view-model.ts#L7-L8).
 
 ## API
 All examples below assume you have these imports and instantiated the `Particle` class:
@@ -48,7 +46,8 @@ const particle = new Particle();
 ```
 
 ### `login`
-Communication between your app and a device is HTTP (REST) based, so the first step is authenticating yourself with the Particle Cloud.
+Communication between your app and a device is HTTP (REST) based,
+so the first step is authenticating yourself with the Particle Cloud:
 
 ```typescript
 particle.login(
@@ -91,14 +90,15 @@ The returned list of `TNSParticleDevice` objects has these properties and functi
 | id | `string` | The unique ID of this device. |
 | name | `string` | The given name of this device. |
 | status | `string` | The current status of the device, usually `normal`. |
-| type | `TNSParticleDeviceType` | One of `Unknown`, `Core`, `Photon`, `P1`, `Electron`, `RaspberryPi`, `DigistumpOak`, `RedBearDuo`, `Bluz`. |
+| type | `[TNSParticleDeviceType](https://github.com/EddyVerbruggen/nativescript-particle/blob/618dea7d0a5d3c1cd9cb287e70142375547faa60/src/particle.common.ts#L1-L10)` | One of `Unknown`, `Core`, `Photon`, `P1`, `Electron`, `RaspberryPi`, `DigistumpOak`, `RedBearDuo`, `Bluz`. |
 | functions | `Array<string>` | The list of functions currently available on the device. You can invoke these with `callFunction` (see below). |
-| variables | `Array<TNSParticleDeviceVariable>` | The list of variables currently available on the device. You can get their values with `getVariable` (see below). |
+| variables | Array<[TNSParticleDeviceVariable](https://github.com/EddyVerbruggen/nativescript-particle/blob/618dea7d0a5d3c1cd9cb287e70142375547faa60/src/particle.common.ts#L38-L41)> | The list of variables currently available on the device. You can get their values with `getVariable` (see below). |
 
 #### `<device>.callFunction`
 You can invoke any of the `functions` you discovered on the device.
 
-As an example let's assume you've flashed [this code tutorial](https://docs.particle.io/guide/getting-started/examples/photon/#read-your-photoresistor-function-and-variable) to your device, so there's a `led` function which takes 1 argument: `"on"`, or `"off"`:
+As an example let's assume you've flashed [this code tutorial](https://docs.particle.io/guide/getting-started/examples/photon/#read-your-photoresistor-function-and-variable) to your device,
+so there's a `led` function which takes 1 argument: the value must be either `"on"`, or `"off"`:
 
 ```typescript
 const myDevice: TNSParticleDevice = null; // you got this from 'listDevices'
