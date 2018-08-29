@@ -17,7 +17,9 @@
 ## Prerequisites
 Hop on over to [the Particle.io store](https://store.particle.io) and order any of their cool devices.
 
-> While developing this plugin and the [demo app](demo/) I used a [Photon Kit](https://store.particle.io/collections/photon) and it was a joy to work with (thanks, [Brandon Satrom](https://twitter.com/BrandonSatrom) for sending one over)!
+> While developing this plugin and the [demo app](demo/) I used a [Photon Kit](https://store.particle.io/collections/photon) and it was a joy to work with.
+>
+> Thanks, [Brandon Satrom](https://twitter.com/BrandonSatrom) for sending one over!
 
 ## Installation
 ```bash
@@ -90,9 +92,9 @@ The returned list of `TNSParticleDevice` objects has these properties and functi
 | id | `string` | The unique ID of this device. |
 | name | `string` | The given name of this device. |
 | status | `string` | The current status of the device, usually `normal`. |
-| type | `[TNSParticleDeviceType](https://github.com/EddyVerbruggen/nativescript-particle/blob/618dea7d0a5d3c1cd9cb287e70142375547faa60/src/particle.common.ts#L1-L10)` | One of `Unknown`, `Core`, `Photon`, `P1`, `Electron`, `RaspberryPi`, `DigistumpOak`, `RedBearDuo`, `Bluz`. |
+| type | [`TNSParticleDeviceType`](https://github.com/EddyVerbruggen/nativescript-particle/blob/618dea7d0a5d3c1cd9cb287e70142375547faa60/src/particle.common.ts#L1-L10) | One of `Unknown`, `Core`, `Photon`, `P1`, `Electron`, `RaspberryPi`, `DigistumpOak`, `RedBearDuo`, `Bluz`. |
 | functions | `Array<string>` | The list of functions currently available on the device. You can invoke these with `callFunction` (see below). |
-| variables | Array<[TNSParticleDeviceVariable](https://github.com/EddyVerbruggen/nativescript-particle/blob/618dea7d0a5d3c1cd9cb287e70142375547faa60/src/particle.common.ts#L38-L41)> | The list of variables currently available on the device. You can get their values with `getVariable` (see below). |
+| variables | `Array<`[`TNSParticleDeviceVariable`](https://github.com/EddyVerbruggen/nativescript-particle/blob/618dea7d0a5d3c1cd9cb287e70142375547faa60/src/particle.common.ts#L38-L41)`>` | The list of variables currently available on the device. You can get their values with `getVariable` (see below). |
 
 #### `<device>.callFunction`
 You can invoke any of the `functions` you discovered on the device.
