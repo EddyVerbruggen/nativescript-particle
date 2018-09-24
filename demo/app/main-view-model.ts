@@ -6,17 +6,26 @@ import { prompt } from "tns-core-modules/ui/dialogs";
 /************ SET THESE FOR QUICK LOGIN ************/
 const PARTICLE_USERNAME = undefined;
 const PARTICLE_PASSWORD = undefined;
+/************ ALT LOGIN WITH TOKEN ************/
+const PARTICLE_TOKEN = undefined;
+/************ SET PARTICLE EVENT NAME ************/
+const PARTICLE_EVENT_NAME = undefined;
 /***************************************************/
+
 
 export class HelloWorldModel extends Observable {
   private static MESSAGE_KEY = "message";
   private static LOGGED_IN_KEY = "loggedIn";
   private static SELECTED_DEVICE_KEY = "selectedDevice";
+  private static SUBSCRIBE_BUTTON_KEY = "subButtonText";
 
   loggedIn: boolean = false;
   message: string = "Log in to get started";
   devices: ObservableArray<TNSParticleDevice> = new ObservableArray<TNSParticleDevice>();
   selectedDevice: TNSParticleDevice;
+  handleEvents: boolean = false;
+  subscribed: boolean = false;
+  subButtonText: string = "Subscribe to Events";
 
   private particle: Particle;
 
@@ -24,11 +33,14 @@ export class HelloWorldModel extends Observable {
     super();
 
     this.particle = new Particle();
+    if (PARTICLE_EVENT_NAME) this.handleEvents = true;
   }
 
   login(): void {
     if (PARTICLE_USERNAME && PARTICLE_PASSWORD) {
       this.doLogin(PARTICLE_USERNAME, PARTICLE_PASSWORD);
+    } else if (PARTICLE_TOKEN){
+      this.doLoginWithToken(PARTICLE_TOKEN);
     } else {
       prompt({
         title: "Particle username",
@@ -56,6 +68,12 @@ export class HelloWorldModel extends Observable {
           this.set(HelloWorldModel.MESSAGE_KEY, "Logged in");
         })
         .catch(error => this.set(HelloWorldModel.MESSAGE_KEY, error));
+  }
+
+  private doLoginWithToken(token: string): void {
+    this.particle.loginWithToken(PARTICLE_TOKEN); 
+    this.set(HelloWorldModel.LOGGED_IN_KEY, true);
+    this.set(HelloWorldModel.MESSAGE_KEY, "Logged in");
   }
 
   logout(): void {
@@ -112,5 +130,28 @@ export class HelloWorldModel extends Observable {
     this.selectedDevice.getVariable(vari.name)
         .then(result => this.set(HelloWorldModel.MESSAGE_KEY, `${vari.name} result: ${result}`))
         .catch(error => this.set(HelloWorldModel.MESSAGE_KEY, error));
+  }
+
+  onDeviceSubscribe(args): void {
+    console.log('subscribe button tapped');
+    console.log(`device:${this.selectedDevice.name}`);
+    this.subscribed = !this.subscribed;
+    this.set(HelloWorldModel.SUBSCRIBE_BUTTON_KEY, this.subscribed ? "Unsubscribe" : "Subscribe to Events");
+    if (this.subscribed) {
+      this.selectedDevice.subscribe(PARTICLE_EVENT_NAME, (data) => {
+        console.log(`selectedDevice.subscribe eventhandler, eventdata:${data}`);
+      });
+      
+    } else {
+      this.selectedDevice.unsubscribe();
+    }
+  }
+
+  startwizard(): void {
+    console.log('start wizard tapped');
+    this.particle.startDeviceSetupWizard((result) => {
+      console.log('wizard callback');
+    });
+    
   }
 }

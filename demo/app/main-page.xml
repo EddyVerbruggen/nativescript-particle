@@ -7,9 +7,12 @@
     <StackLayout orientation="horizontal" horizontalAlignment="center" visibility="{{ loggedIn ? 'visible' : 'collapsed' }}">
       <Button tap="{{ logout }}" text="Log out" class="btn"/>
       <Button tap="{{ listDevices }}" text="List devices" class="btn"/>
+      <Button tap="{{ startwizard }}" text="Add" width="33%" class="btn"/>
     </StackLayout>
 
     <Label text="{{ message }}" class="message" textWrap="true"/>
+
+    <Button tap="{{ onDeviceSubscribe }}" text="{{ subButtonText }}" class="btn" visibility="{{ selectedDevice && handleEvents ? 'visible' : 'collapsed' }}"/>
 
     <ListView separatorColor="transparent" rowHeight="60" width="95%" class="m-15" items="{{ devices }}" itemTap="{{ onDeviceTap }}" horizontalAlignment="center" visibility="{{ !selectedDevice ? 'visible' : 'collapsed' }}">
       <ListView.itemTemplate>

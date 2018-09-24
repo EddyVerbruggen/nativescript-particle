@@ -87,4 +87,20 @@ export class Particle implements TNSParticleAPI {
       worker.onmessage = msg => msg.data.success ? resolve(msg.data.result) : reject(msg.data.error);
     });
   }
+
+  public loginWithToken(token: string): boolean {
+    return true;
+  }
+  public setOAuthConfig(id: string, secret: string): void {
+
+  }
+  public isAuthenticated(): boolean {
+    return true;
+  }
+  public accessToken(): string {
+    return " ";
+  }
+  public startDeviceSetupWizard(cb:any): void {
+    
+  }
 }

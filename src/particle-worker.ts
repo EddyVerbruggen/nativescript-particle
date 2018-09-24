@@ -18,6 +18,7 @@ class MyTNSParticleDevice implements TNSParticleDevice {
   type: TNSParticleDeviceType;
   functions: Array<string>;
   variables: Array<TNSParticleDeviceVariable>;
+  eventIds: string[];
 
   constructor(public particleDevice: any) {
     this.id = particleDevice.getID();
@@ -56,6 +57,12 @@ class MyTNSParticleDevice implements TNSParticleDevice {
         reject(e.nativeException.getBestMessage());
       }
     });
+  }
+  subscribe(name: string, eventHandler:any): void {
+    // function stub
+  }
+  unsubscribe(): void {
+    // function stub
   }
 }
 

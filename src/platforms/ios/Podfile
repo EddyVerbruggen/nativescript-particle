@@ -1,1 +1,2 @@
 pod 'Particle-SDK', '~> 0.8'
+pod 'ParticleSetup', :git => 'http://github.com/markoImake/particle-setup-ios'
