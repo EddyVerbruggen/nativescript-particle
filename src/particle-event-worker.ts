@@ -120,6 +120,7 @@ class MyTNSParticleDevice implements TNSParticleDevice {
     this.eventIds.forEach(element => {
       this.particleDevice.unsubscribeFromEvents(element);
     });
+    this.eventIds = [];
   }
 }
 

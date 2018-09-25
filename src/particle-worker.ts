@@ -61,7 +61,7 @@ class MyTNSParticleDevice implements TNSParticleDevice {
   constructor(public particleDevice: any) {
     this.id = particleDevice.getID();
     this.name = particleDevice.getName();
-    this.status = particleDevice.getStatus();
+    this.status = particleDevice.isConnected() ? particleDevice.getStatus() : "offline";
     this.type = getDeviceType(particleDevice.getProductID());
     this.functions = toJsArray(particleDevice.getFunctions());
     this.variables = toJsonVariables(particleDevice.getVariables());
