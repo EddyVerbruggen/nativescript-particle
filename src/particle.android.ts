@@ -3,6 +3,8 @@ import * as utils from "tns-core-modules/utils/utils";
 
 // keep this baby active while logged in as it holds state (our devices)
 let worker;
+let eventWorker;
+var cbArr: any = undefined;
 
 declare const io: any;
 const ParticleCloudSDK = io.particle.android.sdk.cloud.ParticleCloudSDK;
@@ -11,15 +13,6 @@ export class Particle implements TNSParticleAPI {
 
   constructor() {
     ParticleCloudSDK.init(utils.ad.getApplicationContext());
-    // ParticleCloudSDK.initWithOauthCredentialsProvider(utils.ad.getApplicationContext(),
-    //   new OauthBasicAuthCredentialsProvider() {
-    //       getClientId():string  {
-    //           return 'xxxxx';
-    //       }
-    //       getClientSecret():string  {
-    //           return 'xxxxx';
-    //       }
-    //   });
   }
 
   public login(options: TNSParticleLoginOptions): Promise<void> {
@@ -45,8 +38,11 @@ export class Particle implements TNSParticleAPI {
     if (global["TNS_WEBPACK"]) {
       const WorkerScript = require("nativescript-worker-loader!./particle-worker.js");
       worker = new WorkerScript();
+      const EventWorkerScript = require("nativescript-worker-loader!./particle-event-worker.js");
+      eventWorker = new EventWorkerScript();
     } else {
       worker = new Worker("./particle-worker.js");
+      eventWorker = new Worker("./particle-event-worker.js");
     }
   }
  
@@ -57,7 +53,8 @@ export class Particle implements TNSParticleAPI {
   public logout(): void {
     // no need for a worker here because there are no network calls involved
     ParticleCloudSDK.getCloud().logOut();
-    worker.terminate();
+    if (worker) worker.terminate();
+    if (eventWorker) eventWorker.terminate();
   }
 
   public listDevices(): Promise<Array<TNSParticleDevice>> {
@@ -65,6 +62,7 @@ export class Particle implements TNSParticleAPI {
       worker.postMessage({
         action: "listDevices"
       });
+      
 
       worker.onmessage = msg => {
         if (msg.data.success) {
@@ -75,6 +73,9 @@ export class Particle implements TNSParticleAPI {
             device.getVariable = (name: string): Promise<any> => this.getVariable(device.id, name);
             device.subscribe = (name: string, eventHandler: any): void => this.subscribe(device.id, name, eventHandler);
             device.unsubscribe = (): void => this.unsubscribe(device.id);
+          });
+          eventWorker.postMessage({
+            action: "listDevices"
           });
           resolve(devices);
         } else {
@@ -114,15 +115,22 @@ export class Particle implements TNSParticleAPI {
   }
 
   private unsubscribe(deviceId: string): void {
-    worker.postMessage({
+    eventWorker.postMessage({
       action: "unsubscribe",
       options: { 
         deviceId}
     });
+    cbArr = undefined;
   }
 
   private subscribe(deviceId: string, name: string, eventHandler: any): void {
-    worker.postMessage({
+    if (cbArr == undefined) { 
+      cbArr = {}; 
+    }
+    cbArr[name] = eventHandler;
+    console.dir(cbArr);
+    
+    eventWorker.postMessage({
       action: "subscribe",
       options: { 
         deviceId,
@@ -130,8 +138,14 @@ export class Particle implements TNSParticleAPI {
       }
     });
 
-    worker.onmessage = (msg) => {
-      if (msg.data.success) eventHandler(msg.data.data);
+    eventWorker.onmessage = (msg) => {
+      if (msg.data.success) {
+        const d = msg.data.data;
+        // console.log(`${d.name}: ${d.data}`);
+        var cb : (any) => any;
+        cb = cbArr[d.name];
+        if (cb) cb(d.data);
+      }
     }
   }
 
@@ -144,10 +158,10 @@ export class Particle implements TNSParticleAPI {
   }
 
   public startDeviceSetupWizard(cb:any): void {
-    console.log('stub for startDeviceSetupWizard');
+    // stub for startDeviceSetupWizard
   }
 
   public getDeviceSetupCustomizer(): any {
-    console.log('stub for startDeviceSetupWizard');
+    // stub for getDeviceSetupCustomizer
   }
 }

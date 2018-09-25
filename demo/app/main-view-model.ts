@@ -138,13 +138,13 @@ export class HelloWorldModel extends Observable {
     this.set(HelloWorldModel.SUBSCRIBE_BUTTON_KEY, this.subscribed ? "Unsubscribe" : "Subscribe to Events");
     if (this.subscribed) {
       this.selectedDevice.subscribe(PARTICLE_EVENT_NAME, (data) => {
-        console.log(`selectedDevice.subscribe eventhandler, eventdata: ${data}`);
+        console.log(`selectedDevice.subscribe activity, eventdata: ${data}`);
       });
     } else {
       this.selectedDevice.unsubscribe();
     }
   }
-
+  
   startwizard(): void {
     console.log('start wizard tapped');
     this.particle.startDeviceSetupWizard((result) => {

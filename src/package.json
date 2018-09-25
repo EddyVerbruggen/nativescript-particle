@@ -1,6 +1,6 @@
 {
   "name": "nativescript-particle",
-  "version": "1.1.1",
+  "version": "1.1.0",
   "description": "Control your Particle.io devices from a NativeScript app!",
   "main": "particle",
   "typings": "index.d.ts",

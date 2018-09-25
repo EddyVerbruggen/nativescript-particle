@@ -7,7 +7,8 @@ export type TNSParticleDeviceType =
     | "RaspberryPi"
     | "DigistumpOak"
     | "RedBearDuo"
-    | "Bluz";
+    | "Bluz"
+    | "GFConical";
 
 export type VariableType = "INT" | "DOUBLE" | "STRING";
 
@@ -29,6 +30,8 @@ export function getDeviceType(id: number): TNSParticleDeviceType {
       return "RedBearDuo";
     case 103:
       return "Bluz";
+    case 7822:
+      return "GFConical";
     default:
       console.log(`Unknown device type (id: ${id})`);
       return "Unknown";
