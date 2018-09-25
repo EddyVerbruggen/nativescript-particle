@@ -62,12 +62,13 @@ export interface TNSParticleLoginOptions {
 export interface TNSParticleAPI {
 
   login(options: TNSParticleLoginOptions): Promise<void>;
-  loginWithToken(token: string): Boolean;
+  loginWithToken(token: string): void;
   setOAuthConfig(id: string, secret: string): void;
   logout(): void;
   isAuthenticated(): Boolean;
   accessToken(): string;
   listDevices(): Promise<Array<TNSParticleDevice>>;
   startDeviceSetupWizard(finishHandler: any): void;
+  getDeviceSetupCustomizer(): any;
 }
 

@@ -11,6 +11,15 @@ export class Particle implements TNSParticleAPI {
 
   constructor() {
     ParticleCloudSDK.init(utils.ad.getApplicationContext());
+    // ParticleCloudSDK.initWithOauthCredentialsProvider(utils.ad.getApplicationContext(),
+    //   new OauthBasicAuthCredentialsProvider() {
+    //       getClientId():string  {
+    //           return 'xxxxx';
+    //       }
+    //       getClientSecret():string  {
+    //           return 'xxxxx';
+    //       }
+    //   });
   }
 
   public login(options: TNSParticleLoginOptions): Promise<void> {
@@ -29,6 +38,20 @@ export class Particle implements TNSParticleAPI {
 
       worker.onmessage = msg => msg.data.success ? resolve() : reject(msg.data.error);
     });
+  }
+
+  public loginWithToken(token: string): void {
+    ParticleCloudSDK.getCloud().setAccessToken(token);
+    if (global["TNS_WEBPACK"]) {
+      const WorkerScript = require("nativescript-worker-loader!./particle-worker.js");
+      worker = new WorkerScript();
+    } else {
+      worker = new Worker("./particle-worker.js");
+    }
+  }
+ 
+  public setOAuthConfig(id: string, secret: string): void {
+
   }
 
   public logout(): void {
@@ -50,6 +73,8 @@ export class Particle implements TNSParticleAPI {
           devices.map(device => {
             device.callFunction = (name: string, args): Promise<number> => this.callFunction(device.id, name, args);
             device.getVariable = (name: string): Promise<any> => this.getVariable(device.id, name);
+            device.subscribe = (name: string, eventHandler: any): void => this.subscribe(device.id, name, eventHandler);
+            device.unsubscribe = (): void => this.unsubscribe(device.id);
           });
           resolve(devices);
         } else {
@@ -88,19 +113,41 @@ export class Particle implements TNSParticleAPI {
     });
   }
 
-  public loginWithToken(token: string): boolean {
-    return true;
+  private unsubscribe(deviceId: string): void {
+    worker.postMessage({
+      action: "unsubscribe",
+      options: { 
+        deviceId}
+    });
   }
-  public setOAuthConfig(id: string, secret: string): void {
 
+  private subscribe(deviceId: string, name: string, eventHandler: any): void {
+    worker.postMessage({
+      action: "subscribe",
+      options: { 
+        deviceId,
+        name
+      }
+    });
+
+    worker.onmessage = (msg) => {
+      if (msg.data.success) eventHandler(msg.data.data);
+    }
   }
-  public isAuthenticated(): boolean {
-    return true;
-  }
+
+  public isAuthenticated(): Boolean {
+    return ParticleCloudSDK.getCloud().isLoggedIn();
+}
+  
   public accessToken(): string {
-    return " ";
+    return ParticleCloudSDK.getCloud().getAccessToken();
   }
+
   public startDeviceSetupWizard(cb:any): void {
-    
+    console.log('stub for startDeviceSetupWizard');
+  }
+
+  public getDeviceSetupCustomizer(): any {
+    console.log('stub for startDeviceSetupWizard');
   }
 }

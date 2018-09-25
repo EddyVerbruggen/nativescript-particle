@@ -7,9 +7,48 @@ import {
   TNSParticleDeviceType
 } from "./particle.common";
 
-declare const io: any;
+// declare const io: any;
 const ParticleCloudSDK = io.particle.android.sdk.cloud.ParticleCloudSDK;
+declare module io {
+	export module particle {
+		export module android {
+			export module sdk {
+				export module cloud {
+					export class ParticleCloudSDK {
+						public static class: java.lang.Class<io.particle.android.sdk.cloud.ParticleCloudSDK>;
+						public static getCloud(): any;
+						// public static initWithOauthCredentialsProvider(param0: globalAndroid.content.Context, param1: io.particle.android.sdk.cloud.ApiFactory.OauthBasicAuthCredentialsProvider): void;
+						public static init(param0: globalAndroid.content.Context): void;
+          }
+          export class ParticleEvent {
+						public static class: java.lang.Class<io.particle.android.sdk.cloud.ParticleEvent>;
+						public deviceId: string;
+						public dataPayload: string;
+						public publishedAt: java.util.Date;
+						public timeToLive: number;
+						public constructor(param0: string, param1: string, param2: java.util.Date, param3: number);
+          }
+          export class ParticleEventHandler { 
+						public static class: java.lang.Class<io.particle.android.sdk.cloud.ParticleEventHandler>;
+						/**
+						 * Constructs a new instance of the io.particle.android.sdk.cloud.ParticleEventHandler interface with the provided implementation. An empty constructor exists calling super() when extending the interface class.
+						 */
+						public constructor(implementation: {
+							onEventError(param0: java.lang.Exception): void;
+							onEvent(param0: string, param1: io.particle.android.sdk.cloud.ParticleEvent): void;
+						});
+						public constructor();
+						public onEventError(param0: java.lang.Exception): void;
+						public onEvent(param0: string, param1: io.particle.android.sdk.cloud.ParticleEvent): void;
+          }
+				}
+			}
+		}
+	}
+}
+
 let cachedDevices: Array<MyTNSParticleDevice>;
+var ghandler : any;
 
 class MyTNSParticleDevice implements TNSParticleDevice {
   id: string;
@@ -27,6 +66,7 @@ class MyTNSParticleDevice implements TNSParticleDevice {
     this.type = getDeviceType(particleDevice.getProductID());
     this.functions = toJsArray(particleDevice.getFunctions());
     this.variables = toJsonVariables(particleDevice.getVariables());
+    this.eventIds = [];
   }
 
   getVariable(name: string): Promise<any> {
@@ -58,11 +98,28 @@ class MyTNSParticleDevice implements TNSParticleDevice {
       }
     });
   }
-  subscribe(name: string, eventHandler:any): void {
-    // function stub
+
+  subscribe(name: string, eventHandler: any): void {
+    try {
+      var handler = new io.particle.android.sdk.cloud.ParticleEventHandler({
+        onEventError(param0: java.lang.Exception){
+          (<any>global).postMessage({success: kCMTextDisplayFlag_allSubtitlesForced});
+        },
+        onEvent(param0: string, param1: io.particle.android.sdk.cloud.ParticleEvent){
+          (<any>global).postMessage({success: true, data: param1.dataPayload});
+        }
+      });
+      var id = this.particleDevice.subscribeToEvents(null, handler);
+      this.eventIds.push(id);
+    } catch (e) {
+      console.log(e.nativeException.getBestMessage());
+    }
   }
+
   unsubscribe(): void {
-    // function stub
+    this.eventIds.forEach(element => {
+      this.particleDevice.unsubscribeFromEvents(element);
+    });
   }
 }
 
@@ -124,6 +181,14 @@ const callFunction = (device: TNSParticleDevice, name: string, args): void => {
       .catch(error => (<any>global).postMessage({success: false, error}));
 };
 
+const subcribeFunction = (device: TNSParticleDevice, name: string): void => {
+  device.subscribe(name, null);
+};
+
+const unsubcribeFunction = (device: TNSParticleDevice): void => {
+  device.unsubscribe();
+};
+
 const getDevice = (id: string): TNSParticleDevice => {
   return cachedDevices.filter(cachedDevice => cachedDevice.id === id)[0];
 };
@@ -142,6 +207,12 @@ const getDevice = (id: string): TNSParticleDevice => {
     return;
   } else if (request.action === "getVariable") {
     getVariable(getDevice(request.options.deviceId), request.options.name);
+    return;
+  } else if (request.action === "subscribe") {
+    subcribeFunction(getDevice(request.options.deviceId), request.options.name);
+    return;
+  } else if (request.action === "unsubscribe") {
+    unsubcribeFunction(getDevice(request.options.deviceId));
     return;
   } else {
     (<any>global).postMessage({success: false, error: `Unsupported action sent to worker: '${request.action}'`});

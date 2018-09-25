@@ -12,7 +12,6 @@ const PARTICLE_TOKEN = undefined;
 const PARTICLE_EVENT_NAME = undefined;
 /***************************************************/
 
-
 export class HelloWorldModel extends Observable {
   private static MESSAGE_KEY = "message";
   private static LOGGED_IN_KEY = "loggedIn";
@@ -40,6 +39,8 @@ export class HelloWorldModel extends Observable {
     if (PARTICLE_USERNAME && PARTICLE_PASSWORD) {
       this.doLogin(PARTICLE_USERNAME, PARTICLE_PASSWORD);
     } else if (PARTICLE_TOKEN){
+      console.log('login tap, go for loginwithtoken option');
+      
       this.doLoginWithToken(PARTICLE_TOKEN);
     } else {
       prompt({
@@ -133,15 +134,12 @@ export class HelloWorldModel extends Observable {
   }
 
   onDeviceSubscribe(args): void {
-    console.log('subscribe button tapped');
-    console.log(`device:${this.selectedDevice.name}`);
     this.subscribed = !this.subscribed;
     this.set(HelloWorldModel.SUBSCRIBE_BUTTON_KEY, this.subscribed ? "Unsubscribe" : "Subscribe to Events");
     if (this.subscribed) {
       this.selectedDevice.subscribe(PARTICLE_EVENT_NAME, (data) => {
-        console.log(`selectedDevice.subscribe eventhandler, eventdata:${data}`);
+        console.log(`selectedDevice.subscribe eventhandler, eventdata: ${data}`);
       });
-      
     } else {
       this.selectedDevice.unsubscribe();
     }

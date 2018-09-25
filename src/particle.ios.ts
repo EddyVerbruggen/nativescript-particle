@@ -54,7 +54,7 @@ class MyTNSParticleDevice implements TNSParticleDevice {
   functions: Array<string>;
   variables: Array<TNSParticleDeviceVariable>;
   eventIds: string[] = [];
-
+  
   constructor(public nativeDevice: ParticleDevice) {
     this.id = nativeDevice.id;
     this.name = nativeDevice.name;
@@ -120,8 +120,8 @@ export class Particle implements TNSParticleAPI {
     });
   }
 
-  public loginWithToken(token: string): Boolean {
-    return ParticleCloud.sharedInstance().injectSessionAccessToken(token);
+  public loginWithToken(token: string): void {
+    ParticleCloud.sharedInstance().injectSessionAccessToken(token);
   }
 
   public setOAuthConfig(id:string, secret:string): void{
