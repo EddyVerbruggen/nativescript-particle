@@ -38,11 +38,8 @@ export class Particle implements TNSParticleAPI {
     if (global["TNS_WEBPACK"]) {
       const WorkerScript = require("nativescript-worker-loader!./particle-worker.js");
       worker = new WorkerScript();
-      const EventWorkerScript = require("nativescript-worker-loader!./particle-event-worker.js");
-      eventWorker = new EventWorkerScript();
     } else {
       worker = new Worker("./particle-worker.js");
-      eventWorker = new Worker("./particle-event-worker.js");
     }
   }
  
@@ -74,9 +71,20 @@ export class Particle implements TNSParticleAPI {
             device.subscribe = (name: string, eventHandler: any): void => this.subscribe(device.id, name, eventHandler);
             device.unsubscribe = (): void => this.unsubscribe(device.id);
           });
+
+          // start event subscription worker and get device list
+          if (!eventWorker) {
+            if (global["TNS_WEBPACK"]) {
+              const EventWorkerScript = require("nativescript-worker-loader!./particle-event-worker.js");
+              eventWorker = new EventWorkerScript();
+            } else {
+              eventWorker = new Worker("./particle-event-worker.js");
+            }
+          }
           eventWorker.postMessage({
             action: "listDevices"
           });
+
           resolve(devices);
         } else {
           reject(msg.data.error);
