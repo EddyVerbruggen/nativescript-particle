@@ -61,7 +61,7 @@ class MyTNSParticleDevice implements TNSParticleDevice {
   constructor(public particleDevice: any) {
     this.id = particleDevice.getID();
     this.name = particleDevice.getName();
-    this.status = particleDevice.isConnected() ? particleDevice.getStatus() : "offline";
+    this.status = particleDevice.getStatus();
     this.type = getDeviceType(particleDevice.getProductID());
     this.functions = toJsArray(particleDevice.getFunctions());
     this.variables = toJsonVariables(particleDevice.getVariables());
@@ -105,7 +105,8 @@ class MyTNSParticleDevice implements TNSParticleDevice {
           (<any>global).postMessage({success: kCMTextDisplayFlag_allSubtitlesForced});
         },
         onEvent(param0: string, param1: io.particle.android.sdk.cloud.ParticleEvent){
-          (<any>global).postMessage({success: true, data: param1.dataPayload});
+          if (param1)
+            (<any>global).postMessage({success: true, data: {data: param1.dataPayload, name: param0}});
         }
       });
       var id = this.particleDevice.subscribeToEvents(null, handler);
@@ -119,6 +120,7 @@ class MyTNSParticleDevice implements TNSParticleDevice {
     this.eventIds.forEach(element => {
       this.particleDevice.unsubscribeFromEvents(element);
     });
+    this.eventIds = [];
   }
 }
 
@@ -146,38 +148,22 @@ const toJsonVariables = (nativeMap: java.util.Map<any, any>): Array<TNSParticleD
   return result;
 };
 
-const login = (options: TNSParticleLoginOptions): void => {
-  try {
-    ParticleCloudSDK.getCloud().logIn(options.username, options.password);
-    (<any>global).postMessage({success: true});
-  } catch (e) {
-    (<any>global).postMessage({success: false, error: e.nativeException.getBestMessage()});
-  }
-};
 
 const listDevices = (): void => {
+  console.log(`worker2 listdevices`);
+  
   try {
     const particleDevices = ParticleCloudSDK.getCloud().getDevices();
     cachedDevices = [];
     for (let i = 0; i < particleDevices.size(); i++) {
       cachedDevices.push(new MyTNSParticleDevice(particleDevices.get(i)));
     }
-    (<any>global).postMessage({success: true, devices: cachedDevices});
+    console.log(`worker 2 got devices`);
+    
+    // (<any>global).postMessage({success: true, devices: cachedDevices});
   } catch (e) {
-    (<any>global).postMessage({success: false, error: e.nativeException.getBestMessage()});
+    // (<any>global).postMessage({success: false, error: e.nativeException.getBestMessage()});
   }
-};
-
-const getVariable = (device: TNSParticleDevice, name: string): void => {
-  device.getVariable(name)
-      .then(result => ((<any>global).postMessage({success: true, result})))
-      .catch(error => (<any>global).postMessage({success: false, error}));
-};
-
-const callFunction = (device: TNSParticleDevice, name: string, args): void => {
-  device.callFunction(name, args)
-      .then(result => (<any>global).postMessage({success: true, result: result}))
-      .catch(error => (<any>global).postMessage({success: false, error}));
 };
 
 const subcribeFunction = (device: TNSParticleDevice, name: string): void => {
@@ -195,17 +181,8 @@ const getDevice = (id: string): TNSParticleDevice => {
 (<any>global).onmessage = msg => {
   let request = msg.data;
 
-  if (request.action === "login") {
-    login(request.options);
-    return;
-  } else if (request.action === "listDevices") {
+  if (request.action === "listDevices") {
     listDevices();
-    return;
-  } else if (request.action === "callFunction") {
-    callFunction(getDevice(request.options.deviceId), request.options.name, request.options.args);
-    return;
-  } else if (request.action === "getVariable") {
-    getVariable(getDevice(request.options.deviceId), request.options.name);
     return;
   } else if (request.action === "subscribe") {
     subcribeFunction(getDevice(request.options.deviceId), request.options.name);

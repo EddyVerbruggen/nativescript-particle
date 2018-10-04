@@ -7,7 +7,8 @@ export type TNSParticleDeviceType =
     | "RaspberryPi"
     | "DigistumpOak"
     | "RedBearDuo"
-    | "Bluz";
+    | "Bluz"
+    | "GFConical";
 
 export type VariableType = "INT" | "DOUBLE" | "STRING";
 
@@ -29,6 +30,8 @@ export function getDeviceType(id: number): TNSParticleDeviceType {
       return "RedBearDuo";
     case 103:
       return "Bluz";
+    case 7822:
+      return "GFConical";
     default:
       console.log(`Unknown device type (id: ${id})`);
       return "Unknown";
@@ -47,8 +50,11 @@ export interface TNSParticleDevice {
   type: TNSParticleDeviceType;
   functions: Array<string>;
   variables: Array<TNSParticleDeviceVariable>;
+  eventIds: string[];
   getVariable: (name: string) => Promise<any>;
   callFunction: (name: string, ...args) => Promise<number>;
+  subscribe: (name: string, eventHandler:any) => void;
+  unsubscribe: () => void;
 }
 
 export interface TNSParticleLoginOptions {
@@ -57,9 +63,15 @@ export interface TNSParticleLoginOptions {
 }
 
 export interface TNSParticleAPI {
+
   login(options: TNSParticleLoginOptions): Promise<void>;
-
+  loginWithToken(token: string): void;
+  setOAuthConfig(id: string, secret: string): void;
   logout(): void;
-
+  isAuthenticated(): Boolean;
+  accessToken(): string;
   listDevices(): Promise<Array<TNSParticleDevice>>;
+  startDeviceSetupWizard(finishHandler: any): void;
+  getDeviceSetupCustomizer(): any;
 }
+
