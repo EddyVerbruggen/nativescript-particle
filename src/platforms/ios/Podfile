@@ -1,2 +1,4 @@
+platform :ios, '9.0'
+
 pod 'Particle-SDK', '~> 0.8'
-pod 'ParticleSetup'
+pod 'ParticleSetup', '~> 0.9'

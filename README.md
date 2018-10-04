@@ -132,4 +132,8 @@ myDevice.getVariable("analogvalue")
     .catch(error => console.log(`Error in getVariable: ${error}`));
 ```
 
+## Thanks!
+[markoImake](https://github.com/markoImake) for adding a few [very cool features](https://github.com/EddyVerbruggen/nativescript-particle/pull/2).
+
+
 Happy IoT'ing! 🕹🤖🚪🖲💡📸🎙⛈🚦🛎🔊

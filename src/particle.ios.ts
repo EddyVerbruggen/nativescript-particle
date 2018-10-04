@@ -6,7 +6,6 @@ import {
   TNSParticleDeviceVariable,
   TNSParticleLoginOptions
 } from "./particle.common";
-import * as frameModule from 'tns-core-modules/ui/frame';
 
 const toJsArray = (nativeArray: NSArray<any>): Array<any> => {
   const result: Array<any> = [];
@@ -17,7 +16,6 @@ const toJsArray = (nativeArray: NSArray<any>): Array<any> => {
   }
   return result;
 };
-
 
 const toJsonVariables = (nativeDictionary: NSDictionary<string, string>): Array<TNSParticleDeviceVariable> => {
   const result: Array<TNSParticleDeviceVariable> = [];
@@ -54,7 +52,7 @@ class MyTNSParticleDevice implements TNSParticleDevice {
   functions: Array<string>;
   variables: Array<TNSParticleDeviceVariable>;
   eventIds: string[] = [];
-  
+
   constructor(public nativeDevice: ParticleDevice) {
     this.id = nativeDevice.id;
     this.name = nativeDevice.name;
@@ -85,15 +83,15 @@ class MyTNSParticleDevice implements TNSParticleDevice {
     });
   }
 
-  subscribe(name: string, eventHandler:any): void {
-      const id = this.nativeDevice.subscribeToEventsWithPrefixHandler(name, (event: ParticleEvent, error: NSError) => {
-        if (!error){
-          if (event.data) eventHandler(event.data);
-        } else {
-          console.log(`Error subscribing to event: ${error}`);
-        }
-      });  
-      this.eventIds.push(id);
+  subscribe(name: string, eventHandler: any): void {
+    const id = this.nativeDevice.subscribeToEventsWithPrefixHandler(name, (event: ParticleEvent, error: NSError) => {
+      if (!error) {
+        if (event.data) eventHandler(event.data);
+      } else {
+        console.log(`Error subscribing to event: ${error}`);
+      }
+    });
+    this.eventIds.push(id);
   }
 
   unsubscribe(): void {
@@ -105,7 +103,7 @@ class MyTNSParticleDevice implements TNSParticleDevice {
 
 export class Particle implements TNSParticleAPI {
 
-  private wizardDelegate : ParticleSetupControllerDelegateImpl;
+  private wizardDelegate: ParticleSetupControllerDelegateImpl;
 
   public login(options: TNSParticleLoginOptions): Promise<void> {
     return new Promise<void>((resolve, reject) => {
@@ -124,7 +122,7 @@ export class Particle implements TNSParticleAPI {
     ParticleCloud.sharedInstance().injectSessionAccessToken(token);
   }
 
-  public setOAuthConfig(id:string, secret:string): void{
+  public setOAuthConfig(id: string, secret: string): void {
     ParticleCloud.sharedInstance().oAuthClientId = id;
     ParticleCloud.sharedInstance().oAuthClientSecret = secret;
   }
@@ -135,10 +133,10 @@ export class Particle implements TNSParticleAPI {
 
   public isAuthenticated(): Boolean {
     return ParticleCloud.sharedInstance().isAuthenticated;
-}
-  
+  }
+
   public accessToken(): string {
-      return ParticleCloud.sharedInstance().accessToken;
+    return ParticleCloud.sharedInstance().accessToken;
   }
 
   public listDevices(): Promise<Array<TNSParticleDevice>> {
@@ -158,45 +156,43 @@ export class Particle implements TNSParticleAPI {
     });
   }
 
-  public startDeviceSetupWizard(finishHandler: any): void{
-    console.log('Particle.startDeviceSetup');
-    const setupController = new ParticleSetupMainController();
-    this.wizardDelegate = new ParticleSetupControllerDelegateImpl();
-    this.wizardDelegate.cb = finishHandler;
-    setupController.delegate = this.wizardDelegate;
-    var ctrl = frameModule.topmost().ios.controller;
-    ctrl.navigationBarHidden = true;
-    ctrl.pushViewControllerAnimated(setupController, true);
+  public startDeviceSetupWizard(finishHandler: any): void {
+    const setupController = ParticleSetupMainController.new();
+    console.log(">> bundle: " + ParticleSetupMainController.getResourcesBundle());
+    console.log(">> bundle img: " + ParticleSetupMainController.loadImageFromResourceBundle("spinner"));
+    this.wizardDelegate = ParticleSetupControllerDelegateImpl.createWithOwnerAndCallback(new WeakRef(this), finishHandler);
+    setupController.delegate = <any>this.wizardDelegate;
+    UIApplication.sharedApplication.keyWindow.rootViewController.presentViewControllerAnimatedCompletion(setupController, true, null);
   }
 
-  public getDeviceSetupCustomizer(): any{
+  public getDeviceSetupCustomizer(): any {
     return ParticleSetupCustomization.sharedInstance();
   }
 }
 
-
-declare var ParticleSetupMainController : any;
-declare var ParticleSetupCustomization : any;
 class ParticleSetupControllerDelegateImpl extends NSObject implements ParticleSetupMainControllerDelegate {
-  static ObjCProtocols = [ParticleSetupMainControllerDelegate] // define our native protocalls
+  static ObjCProtocols = [ParticleSetupMainControllerDelegate]; // define our native protocols
 
-  static new(): ParticleSetupControllerDelegateImpl {
-      return <ParticleSetupControllerDelegateImpl>super.new() // calls new() on the NSObject
+  private owner: WeakRef<Particle>;
+  private cb: (result: ParticleSetupMainControllerResult) => void;
+
+  public static new(): ParticleSetupControllerDelegateImpl {
+    return <ParticleSetupControllerDelegateImpl>super.new(); // calls new() on the NSObject
   }
-  cb :any;
 
-  public particleSetupViewControllerDidFinishWithResultDevice(controller, result, device){
-      console.log('particleSetupViewControllerDidFinishWithResultDevice');
-      
-      if(this.cb){
-          this.cb(result);
-      }
+  public static createWithOwnerAndCallback(owner: WeakRef<Particle>, callback: (result: ParticleSetupMainControllerResult) => void): ParticleSetupControllerDelegateImpl {
+    const delegate = <ParticleSetupControllerDelegateImpl>ParticleSetupControllerDelegateImpl.new();
+    delegate.owner = owner;
+    delegate.cb = callback;
+    return delegate;
+  }
+
+  public particleSetupViewControllerDidFinishWithResultDevice(controller: ParticleSetupMainController, result: ParticleSetupMainControllerResult, device: ParticleDevice): void {
+    console.log("particleSetupViewControllerDidFinishWithResultDevice, result: " + result);
+    this.cb && this.cb(result);
+  }
+
+  particleSetupViewControllerDidNotSucceeedWithDeviceID(controller: ParticleSetupMainController, deviceID: string): void {
+    console.log("particleSetupViewControllerDidFinishWithResultDevice");
   }
 }
-interface ParticleSetupMainControllerDelegate {
-	particleSetupViewControllerDidFinishWithResultDevice(controller: any, result: any, device: any): void;
-	particleSetupViewControllerDidNotSucceeedWithDeviceID?(controller: any, deviceID: string): void;
-}
-declare var ParticleSetupMainControllerDelegate: {
-	prototype: ParticleSetupMainControllerDelegate;
-};

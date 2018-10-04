@@ -4,12 +4,13 @@ import { ObservableArray } from "tns-core-modules/data/observable-array";
 import { prompt } from "tns-core-modules/ui/dialogs";
 
 /************ SET THESE FOR QUICK LOGIN ************/
-const PARTICLE_USERNAME = undefined;
-const PARTICLE_PASSWORD = undefined;
+const PARTICLE_USERNAME = "eddyverbruggen@gmail.com";
+const PARTICLE_PASSWORD = "XS4alles";
 /************ ALT LOGIN WITH TOKEN ************/
 const PARTICLE_TOKEN = undefined;
 /************ SET PARTICLE EVENT NAME ************/
 const PARTICLE_EVENT_NAME = undefined;
+
 /***************************************************/
 
 export class HelloWorldModel extends Observable {
@@ -38,9 +39,9 @@ export class HelloWorldModel extends Observable {
   login(): void {
     if (PARTICLE_USERNAME && PARTICLE_PASSWORD) {
       this.doLogin(PARTICLE_USERNAME, PARTICLE_PASSWORD);
-    } else if (PARTICLE_TOKEN){
-      console.log('login tap, go for loginwithtoken option');
-      
+    } else if (PARTICLE_TOKEN) {
+      console.log("login tap, go for loginwithtoken option");
+
       this.doLoginWithToken(PARTICLE_TOKEN);
     } else {
       prompt({
@@ -72,7 +73,7 @@ export class HelloWorldModel extends Observable {
   }
 
   private doLoginWithToken(token: string): void {
-    this.particle.loginWithToken(PARTICLE_TOKEN); 
+    this.particle.loginWithToken(PARTICLE_TOKEN);
     this.set(HelloWorldModel.LOGGED_IN_KEY, true);
     this.set(HelloWorldModel.MESSAGE_KEY, "Logged in");
   }
@@ -111,7 +112,7 @@ export class HelloWorldModel extends Observable {
     const fnc = this.selectedDevice.functions[args.index];
     prompt({
       title: fnc,
-      message: "Enter a comma-sep list of commands to send to this function",
+      message: "Enter a comma-sep list of commands to send to this function (fi: 'on').",
       cancelButtonText: "cancel",
       okButtonText: "Send!"
     }).then(paramsResult => {
@@ -144,12 +145,11 @@ export class HelloWorldModel extends Observable {
       this.selectedDevice.unsubscribe();
     }
   }
-  
+
   startwizard(): void {
-    console.log('start wizard tapped');
+    console.log("start wizard tapped");
     this.particle.startDeviceSetupWizard((result) => {
-      console.log('wizard callback');
+      console.log("wizard callback: " + result);
     });
-    
   }
 }
