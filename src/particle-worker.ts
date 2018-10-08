@@ -13,6 +13,7 @@ class MyTNSParticleDevice implements TNSParticleDevice {
   id: string;
   name: string;
   status: string;
+  connected : boolean;
   type: TNSParticleDeviceType;
   functions: Array<string>;
   variables: Array<TNSParticleDeviceVariable>;
@@ -22,6 +23,7 @@ class MyTNSParticleDevice implements TNSParticleDevice {
     this.id = particleDevice.getID();
     this.name = particleDevice.getName();
     this.status = particleDevice.isConnected() ? particleDevice.getStatus() : "offline";
+    this.connected = particleDevice.isConnected();
     this.type = getDeviceType(particleDevice.getProductID());
     this.functions = toJsArray(particleDevice.getFunctions());
     this.variables = toJsonVariables(particleDevice.getVariables());
