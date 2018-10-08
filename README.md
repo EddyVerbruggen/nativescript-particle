@@ -31,8 +31,8 @@ iOS 12 and up requires you to enable 'Access WiFi Information' for your App ID [
 Also, add this to your `App_Resources/iOS/app.entitlements` (mind the name!) file:
  
 ```xml
-	<key>com.apple.developer.networking.wifi-info</key>
-	<true/>
+<key>com.apple.developer.networking.wifi-info</key>
+<true/>
 ``` 
 
 The [demo app](demo) has this:
