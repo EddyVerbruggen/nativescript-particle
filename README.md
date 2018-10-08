@@ -25,6 +25,29 @@ Hop on over to [the Particle.io store](https://store.particle.io) and order any 
 tns plugin add nativescript-particle
 ```
 
+## iOS 12+ setup
+iOS 12 and up requires you to enable 'Access WiFi Information' for your App ID [here](https://developer.apple.com/account/ios/identifier/bundle).
+
+Also, add this to your `App_Resources/iOS/app.entitlements` (mind the name!) file:
+ 
+```xml
+	<key>com.apple.developer.networking.wifi-info</key>
+	<true/>
+``` 
+
+The [demo app](demo) has this:
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>com.apple.developer.networking.wifi-info</key>
+	<true/>
+</dict>
+</plist>
+```
+
 ## Demo app
 If you want to just play with your Particle device without writing code yet,
 follow these steps to install the demo app I've created with NativeScript Core:
