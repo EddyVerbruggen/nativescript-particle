@@ -1,18 +1,16 @@
 import { TNSParticleAPI, TNSParticleDevice, TNSParticleLoginOptions } from "./particle.common";
 import * as utils from "tns-core-modules/utils/utils";
+import { android as AndroidApp } from "tns-core-modules/application";
 
 // keep this baby active while logged in as it holds state (our devices)
 let worker;
 let eventWorker;
-var cbArr: any = undefined;
-
-declare const io: any;
-const ParticleCloudSDK = io.particle.android.sdk.cloud.ParticleCloudSDK;
+let cbArr: any = undefined;
 
 export class Particle implements TNSParticleAPI {
 
   constructor() {
-    ParticleCloudSDK.init(utils.ad.getApplicationContext());
+    io.particle.android.sdk.cloud.ParticleCloudSDK.init(utils.ad.getApplicationContext());
   }
 
   public login(options: TNSParticleLoginOptions): Promise<void> {
@@ -34,7 +32,7 @@ export class Particle implements TNSParticleAPI {
   }
 
   public loginWithToken(token: string): void {
-    ParticleCloudSDK.getCloud().setAccessToken(token);
+    io.particle.android.sdk.cloud.ParticleCloudSDK.getCloud().setAccessToken(token);
     if (global["TNS_WEBPACK"]) {
       const WorkerScript = require("nativescript-worker-loader!./particle-worker.js");
       worker = new WorkerScript();
@@ -42,14 +40,14 @@ export class Particle implements TNSParticleAPI {
       worker = new Worker("./particle-worker.js");
     }
   }
- 
+
   public setOAuthConfig(id: string, secret: string): void {
 
   }
 
   public logout(): void {
     // no need for a worker here because there are no network calls involved
-    ParticleCloudSDK.getCloud().logOut();
+    io.particle.android.sdk.cloud.ParticleCloudSDK.getCloud().logOut();
     if (worker) worker.terminate();
     if (eventWorker) eventWorker.terminate();
   }
@@ -59,7 +57,7 @@ export class Particle implements TNSParticleAPI {
       worker.postMessage({
         action: "listDevices"
       });
-      
+
 
       worker.onmessage = msg => {
         if (msg.data.success) {
@@ -125,22 +123,23 @@ export class Particle implements TNSParticleAPI {
   private unsubscribe(deviceId: string): void {
     eventWorker.postMessage({
       action: "unsubscribe",
-      options: { 
-        deviceId}
+      options: {
+        deviceId
+      }
     });
     cbArr = undefined;
   }
 
   private subscribe(deviceId: string, name: string, eventHandler: any): void {
-    if (cbArr == undefined) { 
-      cbArr = {}; 
+    if (cbArr === undefined) {
+      cbArr = {};
     }
     cbArr[name] = eventHandler;
     console.dir(cbArr);
-    
+
     eventWorker.postMessage({
       action: "subscribe",
-      options: { 
+      options: {
         deviceId,
         name
       }
@@ -150,23 +149,34 @@ export class Particle implements TNSParticleAPI {
       if (msg.data.success) {
         const d = msg.data.data;
         // console.log(`${d.name}: ${d.data}`);
-        var cb : (any) => any;
-        cb = cbArr[d.name];
-        if (cb) cb(d.data);
+        const cb = cbArr[d.name];
+        cb && cb(d.data);
       }
-    }
+    };
   }
 
-  public isAuthenticated(): Boolean {
-    return ParticleCloudSDK.getCloud().isLoggedIn();
-}
-  
+  public isAuthenticated(): boolean {
+    return io.particle.android.sdk.cloud.ParticleCloudSDK.getCloud().isLoggedIn();
+  }
+
   public accessToken(): string {
-    return ParticleCloudSDK.getCloud().getAccessToken();
+    return io.particle.android.sdk.cloud.ParticleCloudSDK.getCloud().getAccessToken();
   }
 
-  public startDeviceSetupWizard(cb:any): void {
-    // stub for startDeviceSetupWizard
+  public startDeviceSetupWizard(): Promise<boolean> {
+    return new Promise<boolean>((resolve, reject) => {
+      // note that since we _have_ to return an intent, the activity is relaunched, so there's some state juggling required in the app
+      const intent = AndroidApp.foregroundActivity.getIntent();
+      io.particle.android.sdk.devicesetup.ParticleDeviceSetupLibrary.init(utils.ad.getApplicationContext());
+      const builder = new io.particle.android.sdk.devicesetup.SetupCompleteIntentBuilder({
+        buildIntent: (context: globalAndroid.content.Context, setupResult: io.particle.android.sdk.devicesetup.SetupResult): globalAndroid.content.Intent => {
+          resolve(setupResult.wasSuccessful());
+          return intent;
+        }
+      });
+
+      io.particle.android.sdk.devicesetup.ParticleDeviceSetupLibrary.startDeviceSetup(utils.ad.getApplicationContext(), builder);
+    });
   }
 
   public getDeviceSetupCustomizer(): any {

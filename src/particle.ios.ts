@@ -51,7 +51,7 @@ class MyTNSParticleDevice implements TNSParticleDevice {
   type: TNSParticleDeviceType;
   functions: Array<string>;
   variables: Array<TNSParticleDeviceVariable>;
-  eventIds: string[] = [];
+  eventIds: Array<number> = [];
 
   constructor(public nativeDevice: ParticleDevice) {
     this.id = nativeDevice.id;
@@ -131,7 +131,7 @@ export class Particle implements TNSParticleAPI {
     ParticleCloud.sharedInstance().logout();
   }
 
-  public isAuthenticated(): Boolean {
+  public isAuthenticated(): boolean {
     return ParticleCloud.sharedInstance().isAuthenticated;
   }
 
@@ -156,13 +156,13 @@ export class Particle implements TNSParticleAPI {
     });
   }
 
-  public startDeviceSetupWizard(finishHandler: any): void {
-    const setupController = ParticleSetupMainController.new();
-    console.log(">> bundle: " + ParticleSetupMainController.getResourcesBundle());
-    console.log(">> bundle img: " + ParticleSetupMainController.loadImageFromResourceBundle("spinner"));
-    this.wizardDelegate = ParticleSetupControllerDelegateImpl.createWithOwnerAndCallback(new WeakRef(this), finishHandler);
-    setupController.delegate = <any>this.wizardDelegate;
-    UIApplication.sharedApplication.keyWindow.rootViewController.presentViewControllerAnimatedCompletion(setupController, true, null);
+  public startDeviceSetupWizard(): Promise<boolean> {
+    return new Promise<boolean>((resolve, reject) => {
+      const setupController = ParticleSetupMainController.new();
+      this.wizardDelegate = ParticleSetupControllerDelegateImpl.createWithOwnerAndCallback(new WeakRef(this), (result: boolean) => resolve(result));
+      setupController.delegate = <any>this.wizardDelegate;
+      UIApplication.sharedApplication.keyWindow.rootViewController.presentViewControllerAnimatedCompletion(setupController, true, null);
+    });
   }
 
   public getDeviceSetupCustomizer(): any {
@@ -174,13 +174,13 @@ class ParticleSetupControllerDelegateImpl extends NSObject implements ParticleSe
   static ObjCProtocols = [ParticleSetupMainControllerDelegate]; // define our native protocols
 
   private owner: WeakRef<Particle>;
-  private cb: (result: ParticleSetupMainControllerResult) => void;
+  private cb: (result: boolean) => void;
 
   public static new(): ParticleSetupControllerDelegateImpl {
     return <ParticleSetupControllerDelegateImpl>super.new(); // calls new() on the NSObject
   }
 
-  public static createWithOwnerAndCallback(owner: WeakRef<Particle>, callback: (result: ParticleSetupMainControllerResult) => void): ParticleSetupControllerDelegateImpl {
+  public static createWithOwnerAndCallback(owner: WeakRef<Particle>, callback: (result: boolean) => void): ParticleSetupControllerDelegateImpl {
     const delegate = <ParticleSetupControllerDelegateImpl>ParticleSetupControllerDelegateImpl.new();
     delegate.owner = owner;
     delegate.cb = callback;
@@ -189,7 +189,7 @@ class ParticleSetupControllerDelegateImpl extends NSObject implements ParticleSe
 
   public particleSetupViewControllerDidFinishWithResultDevice(controller: ParticleSetupMainController, result: ParticleSetupMainControllerResult, device: ParticleDevice): void {
     console.log("particleSetupViewControllerDidFinishWithResultDevice, result: " + result);
-    this.cb && this.cb(result);
+    this.cb && this.cb(result === ParticleSetupMainControllerResult.Success);
   }
 
   particleSetupViewControllerDidNotSucceeedWithDeviceID(controller: ParticleSetupMainController, deviceID: string): void {

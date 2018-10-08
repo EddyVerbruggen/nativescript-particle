@@ -27,7 +27,8 @@
     "clean": "npm run demo.reset && npx rimraf -- node_modules package-lock.json && npm i",
     "ci.tslint": "npm i && tslint '**/*.ts' --config '../tslint.json' --exclude '**/node_modules/**'",
     "prepack": "npm run build.native",
-    "generate-typings.ios": "cd ../demo && TNS_DEBUG_METADATA_PATH=\"$(pwd)/metadata\" tns build ios && TNS_TYPESCRIPT_DECLARATIONS_PATH=\"$(pwd)/typings\" tns build ios && echo 'Now look for your library typings in demo/typings. Afterwards, remove that folder, and the (intermediate) metadata-* folders.'"
+    "generate-typings.ios": "cd ../demo && TNS_DEBUG_METADATA_PATH=\"$(pwd)/metadata\" tns build ios && TNS_TYPESCRIPT_DECLARATIONS_PATH=\"$(pwd)/typings\" tns build ios && echo 'Now look for your library typings in demo/typings. Afterwards, remove that folder, and the (intermediate) metadata-* folders.'",
+    "generate-typings.android": "echo '##### Download the latest relevant .aar file from https://mvnrepository.com/artifact/io.particle, rename .aar to .zip and extract it. Then move classes.jar to the plugin /src folder' && java -jar ../../android-dts-generator/dts-generator/build/libs/dts-generator.jar -input ./classes.jar -output platforms/android/typings && rimraf classes.jar && echo '##### Done! Deleted src/classes.jar, and generated typings in src/platforms/android/typings/'"
   },
   "keywords": [
     "ecosystem:NativeScript",

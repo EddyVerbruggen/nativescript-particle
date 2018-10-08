@@ -1,51 +1,5 @@
 require("globals"); // necessary to bootstrap tns modules on the new thread
-import {
-  TNSParticleDevice,
-  TNSParticleDeviceVariable,
-  getDeviceType,
-  TNSParticleLoginOptions,
-  TNSParticleDeviceType
-} from "./particle.common";
-
-// declare const io: any;
-const ParticleCloudSDK = io.particle.android.sdk.cloud.ParticleCloudSDK;
-declare module io {
-	export module particle {
-		export module android {
-			export module sdk {
-				export module cloud {
-					export class ParticleCloudSDK {
-						public static class: java.lang.Class<io.particle.android.sdk.cloud.ParticleCloudSDK>;
-						public static getCloud(): any;
-						// public static initWithOauthCredentialsProvider(param0: globalAndroid.content.Context, param1: io.particle.android.sdk.cloud.ApiFactory.OauthBasicAuthCredentialsProvider): void;
-						public static init(param0: globalAndroid.content.Context): void;
-          }
-          export class ParticleEvent {
-						public static class: java.lang.Class<io.particle.android.sdk.cloud.ParticleEvent>;
-						public deviceId: string;
-						public dataPayload: string;
-						public publishedAt: java.util.Date;
-						public timeToLive: number;
-						public constructor(param0: string, param1: string, param2: java.util.Date, param3: number);
-          }
-          export class ParticleEventHandler { 
-						public static class: java.lang.Class<io.particle.android.sdk.cloud.ParticleEventHandler>;
-						/**
-						 * Constructs a new instance of the io.particle.android.sdk.cloud.ParticleEventHandler interface with the provided implementation. An empty constructor exists calling super() when extending the interface class.
-						 */
-						public constructor(implementation: {
-							onEventError(param0: java.lang.Exception): void;
-							onEvent(param0: string, param1: io.particle.android.sdk.cloud.ParticleEvent): void;
-						});
-						public constructor();
-						public onEventError(param0: java.lang.Exception): void;
-						public onEvent(param0: string, param1: io.particle.android.sdk.cloud.ParticleEvent): void;
-          }
-				}
-			}
-		}
-	}
-}
+import { getDeviceType, TNSParticleDevice, TNSParticleDeviceType, TNSParticleDeviceVariable } from "./particle.common";
 
 let cachedDevices: Array<MyTNSParticleDevice>;
 
@@ -56,7 +10,7 @@ class MyTNSParticleDevice implements TNSParticleDevice {
   type: TNSParticleDeviceType;
   functions: Array<string>;
   variables: Array<TNSParticleDeviceVariable>;
-  eventIds: string[];
+  eventIds: Array<number>;
 
   constructor(public particleDevice: any) {
     this.id = particleDevice.getID();
@@ -100,16 +54,18 @@ class MyTNSParticleDevice implements TNSParticleDevice {
 
   subscribe(name: string, eventHandler: any): void {
     try {
-      var handler = new io.particle.android.sdk.cloud.ParticleEventHandler({
-        onEventError(param0: java.lang.Exception){
+      const handler = new io.particle.android.sdk.cloud.ParticleEventHandler({
+        onEventError(exception: java.lang.Exception) {
           (<any>global).postMessage({success: kCMTextDisplayFlag_allSubtitlesForced});
         },
-        onEvent(param0: string, param1: io.particle.android.sdk.cloud.ParticleEvent){
-          if (param1)
-            (<any>global).postMessage({success: true, data: {data: param1.dataPayload, name: param0}});
+        onEvent(param0: string, event: io.particle.android.sdk.cloud.ParticleEvent) {
+          if (event) {
+            (<any>global).postMessage({success: true, data: {data: event.dataPayload, name: param0}});
+          }
         }
       });
-      var id = this.particleDevice.subscribeToEvents(null, handler);
+
+      const id = this.particleDevice.subscribeToEvents(null, handler);
       this.eventIds.push(id);
     } catch (e) {
       console.log(e.nativeException.getBestMessage());
@@ -117,7 +73,7 @@ class MyTNSParticleDevice implements TNSParticleDevice {
   }
 
   unsubscribe(): void {
-    this.eventIds.forEach(element => {
+    this.eventIds.forEach((element: number) => {
       this.particleDevice.unsubscribeFromEvents(element);
     });
     this.eventIds = [];
@@ -151,15 +107,15 @@ const toJsonVariables = (nativeMap: java.util.Map<any, any>): Array<TNSParticleD
 
 const listDevices = (): void => {
   console.log(`worker2 listdevices`);
-  
+
   try {
-    const particleDevices = ParticleCloudSDK.getCloud().getDevices();
+    const particleDevices = io.particle.android.sdk.cloud.ParticleCloudSDK.getCloud().getDevices();
     cachedDevices = [];
     for (let i = 0; i < particleDevices.size(); i++) {
       cachedDevices.push(new MyTNSParticleDevice(particleDevices.get(i)));
     }
     console.log(`worker 2 got devices`);
-    
+
     // (<any>global).postMessage({success: true, devices: cachedDevices});
   } catch (e) {
     // (<any>global).postMessage({success: false, error: e.nativeException.getBestMessage()});
