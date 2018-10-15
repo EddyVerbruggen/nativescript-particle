@@ -48,7 +48,7 @@ class MyTNSParticleDevice implements TNSParticleDevice {
   id: string;
   name: string;
   status: string;
-  connected : boolean;
+  connected: boolean;
   type: TNSParticleDeviceType;
   functions: Array<string>;
   variables: Array<TNSParticleDeviceVariable>;
@@ -150,7 +150,7 @@ export class Particle implements TNSParticleAPI {
         }
 
         const devices = [];
-        if(particleDevices){
+        if (particleDevices) {
           for (let i = 0; i < particleDevices.count; i++) {
             devices.push(new MyTNSParticleDevice(particleDevices.objectAtIndex(i)));
           }

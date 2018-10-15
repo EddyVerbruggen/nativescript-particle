@@ -13,7 +13,7 @@ class MyTNSParticleDevice implements TNSParticleDevice {
   id: string;
   name: string;
   status: string;
-  connected : boolean;
+  connected: boolean;
   type: TNSParticleDeviceType;
   functions: Array<string>;
   variables: Array<TNSParticleDeviceVariable>;
