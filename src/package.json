@@ -17,7 +17,7 @@
     "postclone": "npm i && cd ../demo && npm i && npx rimraf -- package-lock.json && cd ../src",
     "test.android": "npm run tsc && npm run tslint && cd ../demo && tns build android && tns test android --justlaunch",
     "test.ios": "npm run tsc && npm run tslint && cd ../demo && tns build ios && tns test ios --justlaunch",
-    "tslint": "cd .. && tslint \"**/*.ts\" --config tslint.json --exclude \"**/node_modules/**\" --exclude \"**/platforms/**\"",
+    "tslint": "cd .. && tslint \"**/*.ts\" --config tslint.json --exclude '**/node_modules/**' --exclude '**/platforms/**'",
     "demo.ios": "npm run tsc && cd ../demo && tns run ios --syncAllFiles",
     "demo.ios.bundled": "npm run tsc && cd ../demo && tns run ios --bundle --syncAllFiles --emulator",
     "demo.android": "npm run tsc && cd ../demo && tns run android --syncAllFiles",
@@ -25,7 +25,7 @@
     "demo.reset": "cd ../demo && npx rimraf -- hooks node_modules platforms package-lock.json",
     "plugin.prepare": "npm run build && cd ../demo && tns plugin remove nativescript-particle && tns plugin add ../src",
     "clean": "npm run demo.reset && npx rimraf -- node_modules package-lock.json && npm i",
-    "ci.tslint": "npm i && tslint '**/*.ts' --config '../tslint.json' --exclude '**/node_modules/**'",
+    "ci.tslint": "npm i && tslint '**/*.ts' --config '../tslint.json' --exclude '**/node_modules/**' --exclude '**/platforms/**'",
     "prepack": "npm run build.native",
     "generate-typings.ios": "cd ../demo && TNS_DEBUG_METADATA_PATH=\"$(pwd)/metadata\" tns build ios && TNS_TYPESCRIPT_DECLARATIONS_PATH=\"$(pwd)/typings\" tns build ios && echo 'Now look for your library typings in demo/typings. Afterwards, remove that folder, and the (intermediate) metadata-* folders.'",
     "generate-typings.android": "echo '##### Download the latest relevant .aar file from https://mvnrepository.com/artifact/io.particle, rename .aar to .zip and extract it. Then move classes.jar to the plugin /src folder' && java -jar ../../android-dts-generator/dts-generator/build/libs/dts-generator.jar -input ./classes.jar -output platforms/android/typings && rimraf classes.jar && echo '##### Done! Deleted src/classes.jar, and generated typings in src/platforms/android/typings/'"
