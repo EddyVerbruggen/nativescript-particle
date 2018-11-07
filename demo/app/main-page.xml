@@ -10,9 +10,16 @@
       <Button tap="{{ startwizard }}" text="Add" width="33%" class="btn"/>
     </StackLayout>
 
+    <StackLayout orientation="horizontal" horizontalAlignment="center" visibility="{{ loggedIn ? 'visible' : 'collapsed' }}">
+      <Button tap="{{ onPublish }}" text="Publish event" class="btn"/>
+      <Button tap="{{ onSubscribe }}" text="{{ subButtonText }}" class="btn"/>
+    </StackLayout>
+
     <Label text="{{ message }}" class="message" textWrap="true"/>
 
-    <Button tap="{{ onDeviceSubscribe }}" text="{{ subButtonText }}" class="btn" visibility="{{ selectedDevice && handleEvents ? 'visible' : 'collapsed' }}"/>
+    <Button tap="{{ onDeviceSubscribe }}" text="{{ subDeviceButtonText }}" class="btn" visibility="{{ selectedDevice ? 'visible' : 'collapsed' }}"/>
+
+    <Button tap="{{ renameDevice }}" text="Rename device" class="btn" visibility="{{ selectedDevice ? 'visible' : 'collapsed' }}"/>
 
     <ListView separatorColor="transparent" rowHeight="60" width="95%" class="m-15" items="{{ devices }}" itemTap="{{ onDeviceTap }}" horizontalAlignment="center" visibility="{{ !selectedDevice ? 'visible' : 'collapsed' }}">
       <ListView.itemTemplate>
@@ -45,5 +52,6 @@
         </ListView.itemTemplate>
       </ListView>
     </GridLayout>
+
   </StackLayout>
 </Page>

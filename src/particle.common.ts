@@ -43,6 +43,13 @@ export interface TNSParticleDeviceVariable {
   type: VariableType;
 }
 
+export interface TNSParticleEvent {
+  event: string;
+  data: string;
+  date: Date;
+  deviceID: string;
+}
+
 export interface TNSParticleDevice {
   id: string;
   name: string;
@@ -51,10 +58,12 @@ export interface TNSParticleDevice {
   type: TNSParticleDeviceType;
   functions: Array<string>;
   variables: Array<TNSParticleDeviceVariable>;
-  eventIds: number[];
+  eventIds: Array<any>;
+  rename: (name: string) => Promise<void>;
   getVariable: (name: string) => Promise<any>;
   callFunction: (name: string, ...args) => Promise<number>;
-  subscribe: (name: string, eventHandler: any) => void;
+  // TODO return an unsubscribe handler
+  subscribe: (prefix: string, eventHandler: (event: TNSParticleEvent) => void) => void;
   unsubscribe: () => void;
 }
 
@@ -64,6 +73,8 @@ export interface TNSParticleLoginOptions {
 }
 
 export interface TNSParticleAPI {
+  eventIds: Array<any>;
+
   login(options: TNSParticleLoginOptions): Promise<void>;
 
   loginWithToken(token: string): void;
@@ -81,5 +92,11 @@ export interface TNSParticleAPI {
   startDeviceSetupWizard(): Promise<boolean>;
 
   getDeviceSetupCustomizer(): any;
+
+  subscribe: (prefix: string, eventHandler: (event: TNSParticleEvent) => void) => void;
+
+  unsubscribe: () => void;
+
+  publish(name: string, data: string, isPrivate: boolean, ttl?: number): Promise<void>;
 }
 

@@ -1,113 +1,9 @@
 require("globals"); // necessary to bootstrap tns modules on the new thread
-import {
-  getDeviceType,
-  TNSParticleDevice,
-  TNSParticleDeviceType,
-  TNSParticleDeviceVariable,
-  TNSParticleLoginOptions
-} from "./particle.common";
+
+import { MyTNSParticleDevice } from "./particle-worker-base";
+import { TNSParticleDevice, TNSParticleLoginOptions } from "./particle.common";
 
 let cachedDevices: Array<MyTNSParticleDevice>;
-
-class MyTNSParticleDevice implements TNSParticleDevice {
-  id: string;
-  name: string;
-  status: string;
-  connected: boolean;
-  type: TNSParticleDeviceType;
-  functions: Array<string>;
-  variables: Array<TNSParticleDeviceVariable>;
-  eventIds: Array<number>;
-
-  constructor(public particleDevice: any) {
-    this.id = particleDevice.getID();
-    this.name = particleDevice.getName();
-    this.status = particleDevice.isConnected() ? particleDevice.getStatus() : "offline";
-    this.connected = particleDevice.isConnected();
-    this.type = getDeviceType(particleDevice.getProductID());
-    this.functions = toJsArray(particleDevice.getFunctions());
-    this.variables = toJsonVariables(particleDevice.getVariables());
-    this.eventIds = [];
-  }
-
-  getVariable(name: string): Promise<any> {
-    return new Promise<any>((resolve, reject) => {
-      try {
-        const result: any = this.particleDevice.getVariable(name);
-        const className = result.getClass ? result.getClass().getName() : "default";
-        switch (className) {
-          case "java.lang.Integer":
-          case "java.lang.Long":
-          case "java.lang.Double":
-            resolve(Number(String(result)));
-            break;
-          default:
-            resolve(String(result));
-        }
-      } catch (e) {
-        reject(e.nativeException.getBestMessage());
-      }
-    });
-  }
-
-  callFunction(name: string, ...args): Promise<number> {
-    return new Promise<number>((resolve, reject) => {
-      try {
-        resolve(this.particleDevice.callFunction(name, java.util.Arrays.asList(args)));
-      } catch (e) {
-        reject(e.nativeException.getBestMessage());
-      }
-    });
-  }
-
-  subscribe(name: string, eventHandler: any): void {
-    try {
-      const handler = new io.particle.android.sdk.cloud.ParticleEventHandler({
-        onEventError(exception: java.lang.Exception) {
-          (<any>global).postMessage({success: kCMTextDisplayFlag_allSubtitlesForced});
-        },
-        onEvent(param0: string, event: io.particle.android.sdk.cloud.ParticleEvent) {
-          (<any>global).postMessage({success: true, data: event.dataPayload});
-        }
-      });
-
-      const id = this.particleDevice.subscribeToEvents(null, handler);
-      this.eventIds.push(id);
-    } catch (e) {
-      console.log(e.nativeException.getBestMessage());
-    }
-  }
-
-  unsubscribe(): void {
-    this.eventIds.forEach((element: number) => {
-      this.particleDevice.unsubscribeFromEvents(element);
-    });
-  }
-}
-
-const toJsArray = (nativeSet: java.util.Set<any>): Array<any> => {
-  const result: Array<any> = [];
-  if (nativeSet) {
-    const it = nativeSet.iterator();
-    while (it.hasNext()) {
-      result.push(it.next());
-    }
-  }
-  return result;
-};
-
-const toJsonVariables = (nativeMap: java.util.Map<any, any>): Array<TNSParticleDeviceVariable> => {
-  const result: Array<TNSParticleDeviceVariable> = [];
-  if (nativeMap) {
-    const it = nativeMap.keySet().iterator();
-    while (it.hasNext()) {
-      const name = it.next();
-      const type = nativeMap.get(name).toString();
-      result.push({name, type});
-    }
-  }
-  return result;
-};
 
 const login = (options: TNSParticleLoginOptions): void => {
   try {
@@ -143,12 +39,18 @@ const callFunction = (device: TNSParticleDevice, name: string, args): void => {
       .catch(error => (<any>global).postMessage({success: false, error}));
 };
 
-const subcribeFunction = (device: TNSParticleDevice, name: string): void => {
-  device.subscribe(name, null);
+const renameDevice = (device: TNSParticleDevice, name: string): void => {
+  device.rename(name)
+      .then(result => (<any>global).postMessage({success: true}))
+      .catch(error => (<any>global).postMessage({success: false, error}));
 };
 
-const unsubcribeFunction = (device: TNSParticleDevice): void => {
-  device.unsubscribe();
+const publish = (name: string, data: string, isPrivate: boolean, ttl: number): void => {
+  io.particle.android.sdk.cloud.ParticleCloudSDK.getCloud().publishEvent(
+      name,
+      data,
+      isPrivate ? io.particle.android.sdk.cloud.ParticleEventVisibility.PRIVATE : io.particle.android.sdk.cloud.ParticleEventVisibility.PUBLIC,
+      ttl);
 };
 
 const getDevice = (id: string): TNSParticleDevice => {
@@ -164,17 +66,17 @@ const getDevice = (id: string): TNSParticleDevice => {
   } else if (request.action === "listDevices") {
     listDevices();
     return;
+  } else if (request.action === "rename") {
+    renameDevice(getDevice(request.options.deviceId), request.options.name);
+    return;
   } else if (request.action === "callFunction") {
     callFunction(getDevice(request.options.deviceId), request.options.name, request.options.args);
     return;
   } else if (request.action === "getVariable") {
     getVariable(getDevice(request.options.deviceId), request.options.name);
     return;
-  } else if (request.action === "subscribe") {
-    subcribeFunction(getDevice(request.options.deviceId), request.options.name);
-    return;
-  } else if (request.action === "unsubscribe") {
-    unsubcribeFunction(getDevice(request.options.deviceId));
+  } else if (request.action === "publish") {
+    publish(request.options.name, request.options.data, request.options.isPrivate, request.options.ttl);
     return;
   } else {
     (<any>global).postMessage({success: false, error: `Unsupported action sent to worker: '${request.action}'`});

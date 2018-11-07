@@ -1,111 +1,10 @@
 require("globals"); // necessary to bootstrap tns modules on the new thread
-import { getDeviceType, TNSParticleDevice, TNSParticleDeviceType, TNSParticleDeviceVariable } from "./particle.common";
+
+import { MyTNSParticleDevice } from "./particle-worker-base";
+import { TNSParticleDevice, TNSParticleEvent } from "./particle.common";
 
 let cachedDevices: Array<MyTNSParticleDevice>;
-
-class MyTNSParticleDevice implements TNSParticleDevice {
-  id: string;
-  name: string;
-  status: string;
-  connected: boolean;
-  type: TNSParticleDeviceType;
-  functions: Array<string>;
-  variables: Array<TNSParticleDeviceVariable>;
-  eventIds: Array<number>;
-
-  constructor(public particleDevice: any) {
-    this.id = particleDevice.getID();
-    this.name = particleDevice.getName();
-    this.status = particleDevice.getStatus();
-    this.connected = particleDevice.isConnected();
-    this.type = getDeviceType(particleDevice.getProductID());
-    this.functions = toJsArray(particleDevice.getFunctions());
-    this.variables = toJsonVariables(particleDevice.getVariables());
-    this.eventIds = [];
-  }
-
-  getVariable(name: string): Promise<any> {
-    return new Promise<any>((resolve, reject) => {
-      try {
-        const result: any = this.particleDevice.getVariable(name);
-        const className = result.getClass ? result.getClass().getName() : "default";
-        switch (className) {
-          case "java.lang.Integer":
-          case "java.lang.Long":
-          case "java.lang.Double":
-            resolve(Number(String(result)));
-            break;
-          default:
-            resolve(String(result));
-        }
-      } catch (e) {
-        reject(e.nativeException.getBestMessage());
-      }
-    });
-  }
-
-  callFunction(name: string, ...args): Promise<number> {
-    return new Promise<number>((resolve, reject) => {
-      try {
-        resolve(this.particleDevice.callFunction(name, java.util.Arrays.asList(args)));
-      } catch (e) {
-        reject(e.nativeException.getBestMessage());
-      }
-    });
-  }
-
-  subscribe(name: string, eventHandler: any): void {
-    try {
-      const handler = new io.particle.android.sdk.cloud.ParticleEventHandler({
-        onEventError(exception: java.lang.Exception) {
-          (<any>global).postMessage({success: kCMTextDisplayFlag_allSubtitlesForced});
-        },
-        onEvent(param0: string, event: io.particle.android.sdk.cloud.ParticleEvent) {
-          if (event) {
-            (<any>global).postMessage({success: true, data: {data: event.dataPayload, name: param0}});
-          }
-        }
-      });
-
-      const id = this.particleDevice.subscribeToEvents(null, handler);
-      this.eventIds.push(id);
-    } catch (e) {
-      console.log(e.nativeException.getBestMessage());
-    }
-  }
-
-  unsubscribe(): void {
-    this.eventIds.forEach((element: number) => {
-      this.particleDevice.unsubscribeFromEvents(element);
-    });
-    this.eventIds = [];
-  }
-}
-
-const toJsArray = (nativeSet: java.util.Set<any>): Array<any> => {
-  const result: Array<any> = [];
-  if (nativeSet) {
-    const it = nativeSet.iterator();
-    while (it.hasNext()) {
-      result.push(it.next());
-    }
-  }
-  return result;
-};
-
-const toJsonVariables = (nativeMap: java.util.Map<any, any>): Array<TNSParticleDeviceVariable> => {
-  const result: Array<TNSParticleDeviceVariable> = [];
-  if (nativeMap) {
-    const it = nativeMap.keySet().iterator();
-    while (it.hasNext()) {
-      const name = it.next();
-      const type = nativeMap.get(name).toString();
-      result.push({name, type});
-    }
-  }
-  return result;
-};
-
+let eventIds: Array<any> = [];
 
 const listDevices = (): void => {
   console.log(`worker2 listdevices`);
@@ -124,12 +23,40 @@ const listDevices = (): void => {
   }
 };
 
-const subcribeFunction = (device: TNSParticleDevice, name: string): void => {
-  device.subscribe(name, null);
+const subscribeFunction = (prefix: string): void => {
+  try {
+    const handler = new io.particle.android.sdk.cloud.ParticleEventHandler({
+      onEventError(exception: java.lang.Exception) {
+        (<any>global).postMessage({success: false});
+      },
+      onEvent(eventName: string, event: io.particle.android.sdk.cloud.ParticleEvent) {
+        if (event) {
+          (<any>global).postMessage({
+            success: true,
+            data: <TNSParticleEvent>{
+              event: eventName,
+              data: event.dataPayload,
+              date: new Date(event.publishedAt.getTime()),
+              deviceID: event.deviceId
+            }
+          });
+        }
+      }
+    });
+
+    const id = io.particle.android.sdk.cloud.ParticleCloudSDK.getCloud().subscribeToAllEvents(prefix, handler);
+    console.log(">> sub id: " + id);
+    eventIds.push(id);
+  } catch (e) {
+    console.log(e.nativeException.getBestMessage());
+  }
 };
 
-const unsubcribeFunction = (device: TNSParticleDevice): void => {
-  device.unsubscribe();
+const unsubscribeFunction = (): void => {
+  eventIds.forEach((element: number) => {
+    io.particle.android.sdk.cloud.ParticleCloudSDK.getCloud().unsubscribeFromEventWithID(element);
+  });
+  eventIds = [];
 };
 
 const getDevice = (id: string): TNSParticleDevice => {
@@ -137,16 +64,22 @@ const getDevice = (id: string): TNSParticleDevice => {
 };
 
 (<any>global).onmessage = msg => {
-  let request = msg.data;
+  const request = msg.data;
 
   if (request.action === "listDevices") {
     listDevices();
     return;
   } else if (request.action === "subscribe") {
-    subcribeFunction(getDevice(request.options.deviceId), request.options.name);
+    subscribeFunction(request.options.prefix);
     return;
   } else if (request.action === "unsubscribe") {
-    unsubcribeFunction(getDevice(request.options.deviceId));
+    unsubscribeFunction();
+    return;
+  } else if (request.action === "subscribeDevice") {
+    (getDevice(request.options.deviceId)).subscribe(request.options.prefix, null);
+    return;
+  } else if (request.action === "unsubscribeDevice") {
+    (getDevice(request.options.deviceId)).unsubscribe();
     return;
   } else {
     (<any>global).postMessage({success: false, error: `Unsupported action sent to worker: '${request.action}'`});
