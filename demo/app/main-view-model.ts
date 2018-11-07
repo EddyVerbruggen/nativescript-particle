@@ -5,7 +5,7 @@ import { prompt } from "tns-core-modules/ui/dialogs";
 
 /************ SET THESE FOR QUICK LOGIN ************/
 const PARTICLE_USERNAME = "eddyverbruggen@gmail.com";
-const PARTICLE_PASSWORD = "XS4alles";
+const PARTICLE_PASSWORD = "";
 /************ ALT LOGIN WITH TOKEN ************/
 const PARTICLE_TOKEN = undefined;
 /************ SET PARTICLE EVENT NAME ************/
@@ -139,6 +139,14 @@ export class HelloWorldModel extends Observable {
         .catch(error => this.set(HelloWorldModel.MESSAGE_KEY, error));
   }
 
+  onPublish(): void {
+    // you will catch this event only in 'onSubscribe' because of the prefix used
+    this.particle.publish(
+        PARTICLE_EVENT_NAME,
+        "Testing 1-2-3",
+        true);
+  }
+
   onSubscribe(args): void {
     this.subscribed = !this.subscribed;
     this.set(HelloWorldModel.SUBSCRIBE_BUTTON_KEY, this.subscribed ? "Unsub." : "Subscr.");
@@ -173,14 +181,6 @@ export class HelloWorldModel extends Observable {
     } else {
       this.selectedDevice.unsubscribe(PARTICLE_DEVICE_EVENT_NAME);
     }
-  }
-
-  onPublish(): void {
-    // you will catch this event only in 'onSubscribe'
-    this.particle.publish(
-        PARTICLE_EVENT_NAME,
-        "Testing 1-2-3",
-        true);
   }
 
   startwizard(): void {
