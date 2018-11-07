@@ -5,7 +5,7 @@ import { prompt } from "tns-core-modules/ui/dialogs";
 
 /************ SET THESE FOR QUICK LOGIN ************/
 const PARTICLE_USERNAME = "eddyverbruggen@gmail.com";
-const PARTICLE_PASSWORD = "XS4alles";
+const PARTICLE_PASSWORD = "";
 /************ ALT LOGIN WITH TOKEN ************/
 const PARTICLE_TOKEN = undefined;
 /************ SET PARTICLE EVENT NAME ************/
@@ -105,7 +105,7 @@ export class HelloWorldModel extends Observable {
 
   onDeviceTap(args): void {
     this.set(HelloWorldModel.SELECTED_DEVICE_KEY, this.devices.getItem(args.index));
-    this.set(HelloWorldModel.MESSAGE_KEY, `Selected: ${this.selectedDevice.name}`);
+    this.set(HelloWorldModel.MESSAGE_KEY, `Selected: ${this.selectedDevice.name}, now tap any of the functions or variables below`);
   }
 
   onFunctionTap(args): void {
