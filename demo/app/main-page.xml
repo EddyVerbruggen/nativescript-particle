@@ -11,8 +11,9 @@
     </StackLayout>
 
     <StackLayout orientation="horizontal" horizontalAlignment="center" visibility="{{ loggedIn ? 'visible' : 'collapsed' }}">
-      <Button tap="{{ onPublish }}" text="Publish event" class="btn"/>
+      <Button tap="{{ onPublish }}" text="Publish Evt" class="btn"/>
       <Button tap="{{ onSubscribe }}" text="{{ subButtonText }}" class="btn"/>
+      <Button tap="{{ onSubscribeAlt }}" text="{{ subButtonTextAlt }}" class="btn"/>
     </StackLayout>
 
     <Label text="{{ message }}" class="message" textWrap="true"/>

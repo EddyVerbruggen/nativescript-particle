@@ -1,10 +1,10 @@
 require("globals"); // necessary to bootstrap tns modules on the new thread
 
 import { MyTNSParticleDevice } from "./particle-worker-base";
-import { TNSParticleDevice, TNSParticleEvent } from "./particle.common";
+import { TNSParticleEvent } from "./particle.common";
 
 let cachedDevices: Array<MyTNSParticleDevice>;
-let eventIds: Array<any> = [];
+const eventIds: Map<string /* prefix */, number /* handler id */> = new Map();
 
 const listDevices = (): void => {
   console.log(`worker2 listdevices`);
@@ -23,7 +23,7 @@ const listDevices = (): void => {
   }
 };
 
-const subscribeFunction = (prefix: string): void => {
+const subscribeFunction = (prefix: string, handlerId: string): void => {
   try {
     const handler = new io.particle.android.sdk.cloud.ParticleEventHandler({
       onEventError(exception: java.lang.Exception) {
@@ -33,7 +33,9 @@ const subscribeFunction = (prefix: string): void => {
         if (event) {
           (<any>global).postMessage({
             success: true,
+            handlerId,
             data: <TNSParticleEvent>{
+              prefix,
               event: eventName,
               data: event.dataPayload,
               date: new Date(event.publishedAt.getTime()),
@@ -46,20 +48,21 @@ const subscribeFunction = (prefix: string): void => {
 
     const id = io.particle.android.sdk.cloud.ParticleCloudSDK.getCloud().subscribeToAllEvents(prefix, handler);
     console.log(">> sub id: " + id);
-    eventIds.push(id);
+    eventIds.set(prefix, id);
   } catch (e) {
     console.log(e.nativeException.getBestMessage());
   }
 };
 
-const unsubscribeFunction = (): void => {
-  eventIds.forEach((element: number) => {
-    io.particle.android.sdk.cloud.ParticleCloudSDK.getCloud().unsubscribeFromEventWithID(element);
-  });
-  eventIds = [];
+const unsubscribeFunction = (prefix: string): void => {
+  if (eventIds.has(prefix)) {
+    console.log(">> unsub for prefix: " + prefix);
+    io.particle.android.sdk.cloud.ParticleCloudSDK.getCloud().unsubscribeFromEventWithID(eventIds.get(prefix));
+    eventIds.delete(prefix);
+  }
 };
 
-const getDevice = (id: string): TNSParticleDevice => {
+const getDevice = (id: string): MyTNSParticleDevice => {
   return cachedDevices.filter(cachedDevice => cachedDevice.id === id)[0];
 };
 
@@ -70,16 +73,16 @@ const getDevice = (id: string): TNSParticleDevice => {
     listDevices();
     return;
   } else if (request.action === "subscribe") {
-    subscribeFunction(request.options.prefix);
+    subscribeFunction(request.options.prefix, request.options.handlerId);
     return;
   } else if (request.action === "unsubscribe") {
-    unsubscribeFunction();
+    unsubscribeFunction(request.options.prefix);
     return;
   } else if (request.action === "subscribeDevice") {
-    (getDevice(request.options.deviceId)).subscribe(request.options.prefix, null);
+    (getDevice(request.options.deviceId)).subscribe(request.options.prefix, null, request.options.handlerId);
     return;
   } else if (request.action === "unsubscribeDevice") {
-    (getDevice(request.options.deviceId)).unsubscribe();
+    (getDevice(request.options.deviceId)).unsubscribe(request.options.prefix);
     return;
   } else {
     (<any>global).postMessage({success: false, error: `Unsupported action sent to worker: '${request.action}'`});

@@ -27,19 +27,19 @@ const listDevices = (): void => {
   }
 };
 
-const getVariable = (device: TNSParticleDevice, name: string): void => {
+const getVariable = (device: MyTNSParticleDevice, name: string): void => {
   device.getVariable(name)
       .then(result => ((<any>global).postMessage({success: true, result})))
       .catch(error => (<any>global).postMessage({success: false, error}));
 };
 
-const callFunction = (device: TNSParticleDevice, name: string, args): void => {
+const callFunction = (device: MyTNSParticleDevice, name: string, args): void => {
   device.callFunction(name, args)
       .then(result => (<any>global).postMessage({success: true, result: result}))
       .catch(error => (<any>global).postMessage({success: false, error}));
 };
 
-const renameDevice = (device: TNSParticleDevice, name: string): void => {
+const renameDevice = (device: MyTNSParticleDevice, name: string): void => {
   device.rename(name)
       .then(result => (<any>global).postMessage({success: true}))
       .catch(error => (<any>global).postMessage({success: false, error}));
@@ -53,7 +53,7 @@ const publish = (name: string, data: string, isPrivate: boolean, ttl: number): v
       ttl);
 };
 
-const getDevice = (id: string): TNSParticleDevice => {
+const getDevice = (id: string): MyTNSParticleDevice => {
   return cachedDevices.filter(cachedDevice => cachedDevice.id === id)[0];
 };
 

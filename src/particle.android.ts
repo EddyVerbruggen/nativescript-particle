@@ -9,7 +9,7 @@ let cbArr: any = undefined;
 
 export class Particle implements TNSParticleAPI {
 
-  eventIds: Array<any> = [];
+  eventIds: Map<string /* prefix */, (event: TNSParticleEvent) => void /* handler */> = new Map();
 
   constructor() {
     io.particle.android.sdk.cloud.ParticleCloudSDK.init(utils.ad.getApplicationContext());
@@ -34,6 +34,14 @@ export class Particle implements TNSParticleAPI {
       } else {
         eventWorker = new Worker("./particle-event-worker.js");
       }
+
+      eventWorker.onmessage = msg => {
+        if (msg.data.success) {
+          const handlerId = msg.data.handlerId;
+          const handler = this.eventIds.get(handlerId);
+          handler && handler(msg.data.data);
+        }
+      };
     }
   }
 
@@ -85,32 +93,39 @@ export class Particle implements TNSParticleAPI {
   }
 
   public subscribe(prefix: string, eventHandler: (event: TNSParticleEvent) => void): void {
-    this.eventIds[prefix] = eventHandler; // TODO we're not actually using this
     console.dir(this.eventIds);
+
+    if (this.eventIds.has(prefix)) {
+      console.log(`Already subscribed for prefix '${prefix}' - not registering another event handler.`);
+      return;
+    }
+
+    this.eventIds.set(prefix, eventHandler);
 
     this.initEventWorkerIfNeeded();
 
     eventWorker.postMessage({
       action: "subscribe",
       options: {
+        handlerId: prefix,
         prefix
       }
     });
-
-    eventWorker.onmessage = msg => {
-      if (eventHandler && msg.data.success) {
-        eventHandler(msg.data.data);
-      }
-    };
   }
 
-  public unsubscribe(): void {
-    this.initEventWorkerIfNeeded();
+  public unsubscribe(prefix: string): void {
+    if (this.eventIds.has(prefix)) {
+      this.initEventWorkerIfNeeded();
 
-    eventWorker.postMessage({
-      action: "unsubscribe",
-    });
-    this.eventIds = [];
+      eventWorker.postMessage({
+        action: "unsubscribe",
+        options: {
+          prefix
+        }
+      });
+
+      this.eventIds.delete(prefix);
+    }
   }
 
   public listDevices(): Promise<Array<TNSParticleDevice>> {
@@ -131,7 +146,7 @@ export class Particle implements TNSParticleAPI {
             device.callFunction = (name: string, args): Promise<number> => this.callFunction(device.id, name, args);
             device.getVariable = (name: string): Promise<any> => this.getVariable(device.id, name);
             device.subscribe = (prefix: string, eventHandler: (event: TNSParticleEvent) => void): void => this.subscribeDevice(device.id, prefix, eventHandler);
-            device.unsubscribe = (): void => this.unsubscribeDevice(device.id);
+            device.unsubscribe = (prefix: string): void => this.unsubscribeDevice(device.id, prefix);
           });
 
           // start event subscription worker and get device list
@@ -227,6 +242,15 @@ export class Particle implements TNSParticleAPI {
   }
 
   private subscribeDevice(deviceId: string, prefix: string, eventHandler: (event: TNSParticleEvent) => void): void {
+    console.dir(this.eventIds);
+
+    if (this.eventIds.has(prefix)) {
+      console.log(`Already subscribed for prefix '${prefix}' - not registering another event handler.`);
+      return;
+    }
+
+    this.eventIds.set(prefix, eventHandler);
+
     if (cbArr === undefined) {
       cbArr = {};
     }
@@ -238,32 +262,23 @@ export class Particle implements TNSParticleAPI {
     eventWorker.postMessage({
       action: "subscribeDevice",
       options: {
+        handlerId: `${deviceId}_${prefix}`,
         deviceId,
         prefix
       }
     });
-
-    eventWorker.onmessage = (msg) => {
-      if (msg.data.success) {
-        // TODO return more than 'data'
-        const d: TNSParticleEvent = msg.data.data;
-        // TODO this won't work, because the prefix <> eventname
-        // const cb = cbArr[d.name];
-        // cb && cb(d);
-        eventHandler && eventHandler(d);
-      }
-    };
   }
 
-  private unsubscribeDevice(deviceId: string): void {
+  private unsubscribeDevice(deviceId: string, prefix: string): void {
     this.initEventWorkerIfNeeded();
 
     eventWorker.postMessage({
       action: "unsubscribeDevice",
       options: {
-        deviceId
+        deviceId,
+        prefix
       }
     });
-    cbArr = undefined;
+    cbArr = undefined; // TODO
   }
 }

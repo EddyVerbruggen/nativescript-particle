@@ -10,6 +10,7 @@ const PARTICLE_PASSWORD = "XS4alles";
 const PARTICLE_TOKEN = undefined;
 /************ SET PARTICLE EVENT NAME ************/
 const PARTICLE_EVENT_NAME = "temp";
+const PARTICLE_EVENT_NAME_ALT = "tempC";
 
 /***************************************************/
 
@@ -18,6 +19,7 @@ export class HelloWorldModel extends Observable {
   private static LOGGED_IN_KEY = "loggedIn";
   private static SELECTED_DEVICE_KEY = "selectedDevice";
   private static SUBSCRIBE_BUTTON_KEY = "subButtonText";
+  private static SUBSCRIBE_ALT_BUTTON_KEY = "subButtonTextAlt";
   private static SUBSCRIBE_DEVICE_BUTTON_KEY = "subDeviceButtonText";
 
   loggedIn: boolean = false;
@@ -25,8 +27,10 @@ export class HelloWorldModel extends Observable {
   devices: ObservableArray<TNSParticleDevice> = new ObservableArray<TNSParticleDevice>();
   selectedDevice: TNSParticleDevice;
   subscribed: boolean = false;
+  subscribedAlt: boolean = false;
   subscribedDevice: boolean = false;
-  subButtonText: string = "Subscribe to Events";
+  subButtonText: string = "Subscr.";
+  subButtonTextAlt: string = "Subscr. alt";
   subDeviceButtonText: string = "Subscribe to Device Events";
 
   private particle: Particle;
@@ -136,13 +140,25 @@ export class HelloWorldModel extends Observable {
 
   onSubscribe(args): void {
     this.subscribed = !this.subscribed;
-    this.set(HelloWorldModel.SUBSCRIBE_BUTTON_KEY, this.subscribed ? "Unsubscribe" : "Subscribe to Events");
+    this.set(HelloWorldModel.SUBSCRIBE_BUTTON_KEY, this.subscribed ? "Unsub." : "Subscr.");
     if (this.subscribed) {
       this.particle.subscribe(
           PARTICLE_EVENT_NAME,
           (event: TNSParticleEvent) => console.log(`global subscribe activity, eventdata: ${JSON.stringify(event)}`));
     } else {
-      this.particle.unsubscribe();
+      this.particle.unsubscribe(PARTICLE_EVENT_NAME);
+    }
+  }
+
+  onSubscribeAlt(args): void {
+    this.subscribedAlt = !this.subscribedAlt;
+    this.set(HelloWorldModel.SUBSCRIBE_ALT_BUTTON_KEY, this.subscribedAlt ? "Unsub." : "Subscr. alt");
+    if (this.subscribedAlt) {
+      this.particle.subscribe(
+          PARTICLE_EVENT_NAME_ALT,
+          (event: TNSParticleEvent) => console.log(`global subscribe activity (alt), eventdata: ${JSON.stringify(event)}`));
+    } else {
+      this.particle.unsubscribe(PARTICLE_EVENT_NAME_ALT);
     }
   }
 
@@ -154,12 +170,12 @@ export class HelloWorldModel extends Observable {
           PARTICLE_EVENT_NAME,
           (event: TNSParticleEvent) => console.log(`device subscribe activity, eventdata: ${JSON.stringify(event)}`));
     } else {
-      this.selectedDevice.unsubscribe();
+      this.selectedDevice.unsubscribe(PARTICLE_EVENT_NAME);
     }
   }
 
   onPublish(): void {
-    // you will catch this event in 'onSubscribe' (not in 'onDeviceSubscribe')
+    // you will catch this event only in 'onSubscribe'
     this.particle.publish(
         PARTICLE_EVENT_NAME,
         "Testing 1-2-3",

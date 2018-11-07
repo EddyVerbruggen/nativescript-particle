@@ -14,7 +14,7 @@ export class MyTNSParticleDevice implements TNSParticleDevice {
   type: TNSParticleDeviceType;
   functions: Array<string>;
   variables: Array<TNSParticleDeviceVariable>;
-  eventIds: Array<any>;
+  eventIds: Map<string /* prefix */, any /* handler id */>;
 
   constructor(public particleDevice: any) {
     this.id = particleDevice.getID();
@@ -24,7 +24,7 @@ export class MyTNSParticleDevice implements TNSParticleDevice {
     this.type = getDeviceType(particleDevice.getProductID());
     this.functions = toJsArray(particleDevice.getFunctions());
     this.variables = toJsonVariables(particleDevice.getVariables());
-    this.eventIds = [];
+    this.eventIds = new Map();
   }
 
   rename(name: string): Promise<void> {
@@ -64,8 +64,13 @@ export class MyTNSParticleDevice implements TNSParticleDevice {
     });
   }
 
-  subscribe(prefix: string, eventHandler?: (event: TNSParticleEvent) => void): void {
+  subscribe(prefix: string, eventHandler: (event: TNSParticleEvent) => void, handlerId?: string): void {
     try {
+      if (this.eventIds.has(prefix)) {
+        console.log(`There's already a handler registered for prefix '${prefix}' - skipping subscribe`);
+        return;
+      }
+
       const handler = new io.particle.android.sdk.cloud.ParticleEventHandler({
         onEventError(exception: java.lang.Exception) {
           (<any>global).postMessage({success: false});
@@ -74,7 +79,9 @@ export class MyTNSParticleDevice implements TNSParticleDevice {
           if (event) {
             (<any>global).postMessage({
               success: true,
+              handlerId,
               data: <TNSParticleEvent>{
+                prefix,
                 event: eventName,
                 data: event.dataPayload,
                 date: new Date(event.publishedAt.getTime()),
@@ -86,17 +93,21 @@ export class MyTNSParticleDevice implements TNSParticleDevice {
       });
 
       const id = this.particleDevice.subscribeToEvents(prefix, handler);
-      this.eventIds.push(id);
+      this.eventIds.set(prefix, id);
     } catch (e) {
       console.log(e.nativeException.getBestMessage());
     }
   }
 
-  unsubscribe(): void {
-    this.eventIds.forEach((element: number) => {
-      this.particleDevice.unsubscribeFromEvents(element);
-    });
-    this.eventIds = [];
+  unsubscribe(prefix: string): void {
+    if (!this.eventIds.has(prefix)) {
+      console.log(`No handler registered from prefix '${prefix}' - skipping unsubscribe`);
+      return;
+    }
+
+    console.log(">> unsub for prefix: " + prefix);
+    this.particleDevice.unsubscribeFromEvents(this.eventIds.get(prefix));
+    this.eventIds.delete(prefix);
   }
 }
 
