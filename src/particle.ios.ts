@@ -126,7 +126,6 @@ class MyTNSParticleDevice implements TNSParticleDevice {
       return;
     }
 
-    console.log(">> unsub for prefix: " + prefix);
     this.nativeDevice.unsubscribeFromEventWithID(this.eventIds.get(prefix));
     this.eventIds.delete(prefix);
   }
@@ -231,7 +230,6 @@ export class Particle implements TNSParticleAPI {
       return;
     }
 
-    console.log(">> unsub for prefix: " + prefix);
     ParticleCloud.sharedInstance().unsubscribeFromEventWithID(this.eventIds.get(prefix));
     this.eventIds.delete(prefix);
   }
@@ -268,11 +266,9 @@ class ParticleSetupControllerDelegateImpl extends NSObject implements ParticleSe
   }
 
   public particleSetupViewControllerDidFinishWithResultDevice(controller: ParticleSetupMainController, result: ParticleSetupMainControllerResult, device: ParticleDevice): void {
-    console.log("particleSetupViewControllerDidFinishWithResultDevice, result: " + result);
     this.cb && this.cb(result === ParticleSetupMainControllerResult.Success);
   }
 
   particleSetupViewControllerDidNotSucceeedWithDeviceID(controller: ParticleSetupMainController, deviceID: string): void {
-    console.log("particleSetupViewControllerDidFinishWithResultDevice");
   }
 }

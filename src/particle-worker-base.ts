@@ -105,7 +105,6 @@ export class MyTNSParticleDevice implements TNSParticleDevice {
       return;
     }
 
-    console.log(">> unsub for prefix: " + prefix);
     this.particleDevice.unsubscribeFromEvents(this.eventIds.get(prefix));
     this.eventIds.delete(prefix);
   }

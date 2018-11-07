@@ -2,10 +2,8 @@ import { TNSParticleAPI, TNSParticleDevice, TNSParticleEvent, TNSParticleLoginOp
 import * as utils from "tns-core-modules/utils/utils";
 import { android as AndroidApp } from "tns-core-modules/application";
 
-// keep this baby active while logged in as it holds state (our devices)
-let worker;
-let eventWorker;
-let cbArr: any = undefined;
+// keep these babies active while logged in as it holds state (our devices)
+let worker, eventWorker;
 
 export class Particle implements TNSParticleAPI {
 
@@ -251,12 +249,6 @@ export class Particle implements TNSParticleAPI {
 
     this.eventIds.set(prefix, eventHandler);
 
-    if (cbArr === undefined) {
-      cbArr = {};
-    }
-    cbArr[prefix] = eventHandler;
-    console.dir(cbArr);
-
     this.initEventWorkerIfNeeded();
 
     eventWorker.postMessage({
@@ -279,6 +271,7 @@ export class Particle implements TNSParticleAPI {
         prefix
       }
     });
-    cbArr = undefined; // TODO
+
+    this.eventIds.delete(prefix);
   }
 }

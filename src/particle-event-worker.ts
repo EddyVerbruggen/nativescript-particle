@@ -7,19 +7,13 @@ let cachedDevices: Array<MyTNSParticleDevice>;
 const eventIds: Map<string /* prefix */, number /* handler id */> = new Map();
 
 const listDevices = (): void => {
-  console.log(`worker2 listdevices`);
-
   try {
     const particleDevices = io.particle.android.sdk.cloud.ParticleCloudSDK.getCloud().getDevices();
     cachedDevices = [];
     for (let i = 0; i < particleDevices.size(); i++) {
       cachedDevices.push(new MyTNSParticleDevice(particleDevices.get(i)));
     }
-    console.log(`worker 2 got devices`);
-
-    // (<any>global).postMessage({success: true, devices: cachedDevices});
   } catch (e) {
-    // (<any>global).postMessage({success: false, error: e.nativeException.getBestMessage()});
   }
 };
 
@@ -47,7 +41,6 @@ const subscribeFunction = (prefix: string, handlerId: string): void => {
     });
 
     const id = io.particle.android.sdk.cloud.ParticleCloudSDK.getCloud().subscribeToAllEvents(prefix, handler);
-    console.log(">> sub id: " + id);
     eventIds.set(prefix, id);
   } catch (e) {
     console.log(e.nativeException.getBestMessage());
@@ -56,7 +49,6 @@ const subscribeFunction = (prefix: string, handlerId: string): void => {
 
 const unsubscribeFunction = (prefix: string): void => {
   if (eventIds.has(prefix)) {
-    console.log(">> unsub for prefix: " + prefix);
     io.particle.android.sdk.cloud.ParticleCloudSDK.getCloud().unsubscribeFromEventWithID(eventIds.get(prefix));
     eventIds.delete(prefix);
   }

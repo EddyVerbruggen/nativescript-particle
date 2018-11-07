@@ -1,7 +1,7 @@
 require("globals"); // necessary to bootstrap tns modules on the new thread
 
 import { MyTNSParticleDevice } from "./particle-worker-base";
-import { TNSParticleDevice, TNSParticleLoginOptions } from "./particle.common";
+import { TNSParticleLoginOptions } from "./particle.common";
 
 let cachedDevices: Array<MyTNSParticleDevice>;
 
