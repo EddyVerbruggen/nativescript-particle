@@ -74,7 +74,7 @@ const getDevice = (id: string): MyTNSParticleDevice => {
     (getDevice(request.options.deviceId)).subscribe(request.options.prefix, null, request.options.handlerId);
     return;
   } else if (request.action === "unsubscribeDevice") {
-    (getDevice(request.options.deviceId)).unsubscribe(request.options.prefix);
+    (getDevice(request.options.deviceId)).unsubscribe(request.options.prefix, request.options.handlerId);
     return;
   } else {
     (<any>global).postMessage({success: false, error: `Unsupported action sent to worker: '${request.action}'`});

@@ -9,6 +9,7 @@ const PARTICLE_PASSWORD = "XS4alles";
 /************ ALT LOGIN WITH TOKEN ************/
 const PARTICLE_TOKEN = undefined;
 /************ SET PARTICLE EVENT NAME ************/
+const PARTICLE_DEVICE_EVENT_NAME = "beamStatus"; // this can be used in case the 'Publish' app is flashed onto the device
 const PARTICLE_EVENT_NAME = "temp";
 const PARTICLE_EVENT_NAME_ALT = "tempC";
 
@@ -167,10 +168,10 @@ export class HelloWorldModel extends Observable {
     this.set(HelloWorldModel.SUBSCRIBE_DEVICE_BUTTON_KEY, this.subscribedDevice ? "Unsubscribe" : "Subscribe to Device Events");
     if (this.subscribedDevice) {
       this.selectedDevice.subscribe(
-          PARTICLE_EVENT_NAME,
+          PARTICLE_DEVICE_EVENT_NAME,
           (event: TNSParticleEvent) => console.log(`device subscribe activity, eventdata: ${JSON.stringify(event)}`));
     } else {
-      this.selectedDevice.unsubscribe(PARTICLE_EVENT_NAME);
+      this.selectedDevice.unsubscribe(PARTICLE_DEVICE_EVENT_NAME);
     }
   }
 

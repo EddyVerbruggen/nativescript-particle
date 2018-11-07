@@ -35,9 +35,13 @@ export class Particle implements TNSParticleAPI {
 
       eventWorker.onmessage = msg => {
         if (msg.data.success) {
+          console.log(">> success.. " + msg.data.handlerId);
           const handlerId = msg.data.handlerId;
           const handler = this.eventIds.get(handlerId);
+          console.log(">> success.. handler: " + handler);
           handler && handler(msg.data.data);
+        } else {
+          console.log("----- no success");
         }
       };
     }
@@ -91,8 +95,6 @@ export class Particle implements TNSParticleAPI {
   }
 
   public subscribe(prefix: string, eventHandler: (event: TNSParticleEvent) => void): void {
-    console.dir(this.eventIds);
-
     if (this.eventIds.has(prefix)) {
       console.log(`Already subscribed for prefix '${prefix}' - not registering another event handler.`);
       return;
@@ -112,18 +114,21 @@ export class Particle implements TNSParticleAPI {
   }
 
   public unsubscribe(prefix: string): void {
-    if (this.eventIds.has(prefix)) {
-      this.initEventWorkerIfNeeded();
-
-      eventWorker.postMessage({
-        action: "unsubscribe",
-        options: {
-          prefix
-        }
-      });
-
-      this.eventIds.delete(prefix);
+    if (!this.eventIds.has(prefix)) {
+      console.log(`No handler registered from prefix '${prefix}' - skipping unsubscribe`);
+      return;
     }
+
+    this.initEventWorkerIfNeeded();
+
+    eventWorker.postMessage({
+      action: "unsubscribe",
+      options: {
+        prefix
+      }
+    });
+
+    this.eventIds.delete(prefix);
   }
 
   public listDevices(): Promise<Array<TNSParticleDevice>> {
@@ -240,21 +245,21 @@ export class Particle implements TNSParticleAPI {
   }
 
   private subscribeDevice(deviceId: string, prefix: string, eventHandler: (event: TNSParticleEvent) => void): void {
-    console.dir(this.eventIds);
+    const handlerId = `${deviceId}_${prefix}`;
 
-    if (this.eventIds.has(prefix)) {
+    if (this.eventIds.has(handlerId)) {
       console.log(`Already subscribed for prefix '${prefix}' - not registering another event handler.`);
       return;
     }
 
-    this.eventIds.set(prefix, eventHandler);
+    this.eventIds.set(handlerId, eventHandler);
 
     this.initEventWorkerIfNeeded();
 
     eventWorker.postMessage({
       action: "subscribeDevice",
       options: {
-        handlerId: `${deviceId}_${prefix}`,
+        handlerId,
         deviceId,
         prefix
       }
@@ -262,16 +267,24 @@ export class Particle implements TNSParticleAPI {
   }
 
   private unsubscribeDevice(deviceId: string, prefix: string): void {
+    const handlerId = `${deviceId}_${prefix}`;
+
+    if (!this.eventIds.has(handlerId)) {
+      console.log(`No handler registered from prefix '${handlerId}' - skipping unsubscribe`);
+      return;
+    }
+
     this.initEventWorkerIfNeeded();
 
     eventWorker.postMessage({
       action: "unsubscribeDevice",
       options: {
+        handlerId,
         deviceId,
-        prefix
+        prefix,
       }
     });
 
-    this.eventIds.delete(prefix);
+    this.eventIds.delete(handlerId);
   }
 }

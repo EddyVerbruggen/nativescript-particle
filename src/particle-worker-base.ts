@@ -66,8 +66,8 @@ export class MyTNSParticleDevice implements TNSParticleDevice {
 
   subscribe(prefix: string, eventHandler: (event: TNSParticleEvent) => void, handlerId?: string): void {
     try {
-      if (this.eventIds.has(prefix)) {
-        console.log(`There's already a handler registered for prefix '${prefix}' - skipping subscribe`);
+      if (this.eventIds.has(handlerId)) {
+        console.log(`There's already a handler registered for prefix '${handlerId}' - skipping subscribe`);
         return;
       }
 
@@ -93,20 +93,20 @@ export class MyTNSParticleDevice implements TNSParticleDevice {
       });
 
       const id = this.particleDevice.subscribeToEvents(prefix, handler);
-      this.eventIds.set(prefix, id);
+      this.eventIds.set(handlerId, id);
     } catch (e) {
       console.log(e.nativeException.getBestMessage());
     }
   }
 
-  unsubscribe(prefix: string): void {
-    if (!this.eventIds.has(prefix)) {
-      console.log(`No handler registered from prefix '${prefix}' - skipping unsubscribe`);
+  unsubscribe(prefix: string, handlerId?: string): void {
+    if (!this.eventIds.has(handlerId)) {
+      console.log(`No handler registered for prefix '${handlerId}' - skipping unsubscribe`);
       return;
     }
 
-    this.particleDevice.unsubscribeFromEvents(this.eventIds.get(prefix));
-    this.eventIds.delete(prefix);
+    this.particleDevice.unsubscribeFromEvents(this.eventIds.get(handlerId));
+    this.eventIds.delete(handlerId);
   }
 }
 
