@@ -14,7 +14,7 @@
 <img src="https://github.com/EddyVerbruggen/nativescript-particle/raw/master/demo/app/images/particle-logo.png" width="250px" alt="Particle.io logo"/><br/>
 
 ## Prerequisites
-Hop on over to [the Particle.io store](https://store.particle.io) and order any of their cool devices.
+Hop on over to [the Particle.io store](https://store.particle.io) and order any or all of their cool devices.
 
 > While developing this plugin and the [demo app](demo/) I used a [Photon Kit](https://store.particle.io/collections/photon) and it was a joy to work with.
 >
