@@ -234,9 +234,12 @@ export class Particle implements TNSParticleAPI {
     this.eventIds.delete(prefix);
   }
 
-  public startDeviceSetupWizard(): Promise<boolean> {
+  public startDeviceSetupWizard(o?: { setupOnly: boolean; }): Promise<boolean> {
+    if (!o) {
+      o = { setupOnly: false };
+    }
     return new Promise<boolean>((resolve, reject) => {
-      const setupController = ParticleSetupMainController.new();
+      const setupController = ParticleSetupMainController.new().initWithSetupOnly(o.setupOnly);
       this.wizardDelegate = ParticleSetupControllerDelegateImpl.createWithOwnerAndCallback(new WeakRef(this), (result: boolean) => resolve(result));
       setupController.delegate = <any>this.wizardDelegate;
       UIApplication.sharedApplication.keyWindow.rootViewController.presentViewControllerAnimatedCompletion(setupController, true, null);

@@ -175,7 +175,7 @@ export class Particle implements TNSParticleAPI {
     return io.particle.android.sdk.cloud.ParticleCloudSDK.getCloud().getAccessToken();
   }
 
-  public startDeviceSetupWizard(): Promise<boolean> {
+  public startDeviceSetupWizard(o?: { setupOnly: boolean; }): Promise<boolean> {
     return new Promise<boolean>((resolve, reject) => {
       // note that since we _have_ to return an intent, the activity is relaunched, so there's some state juggling required in the app
       const intent = AndroidApp.foregroundActivity.getIntent();
@@ -190,6 +190,7 @@ export class Particle implements TNSParticleAPI {
       io.particle.android.sdk.devicesetup.ParticleDeviceSetupLibrary.startDeviceSetup(utils.ad.getApplicationContext(), builder);
     });
   }
+
 
   public getDeviceSetupCustomizer(): any {
     // stub for getDeviceSetupCustomizer

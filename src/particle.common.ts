@@ -87,7 +87,7 @@ export interface TNSParticleAPI {
 
   listDevices(): Promise<Array<TNSParticleDevice>>;
 
-  startDeviceSetupWizard(): Promise<boolean>;
+  startDeviceSetupWizard(o?: { setupOnly: boolean; }): Promise<boolean>;
 
   getDeviceSetupCustomizer(): any;
 
