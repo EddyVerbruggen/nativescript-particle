@@ -239,7 +239,7 @@ export class Particle implements TNSParticleAPI {
       o = { setupOnly: false };
     }
     return new Promise<boolean>((resolve, reject) => {
-      const setupController = ParticleSetupMainController.new().initWithSetupOnly(o.setupOnly);
+      const setupController = new ParticleSetupMainController({setupOnly: true});
       this.wizardDelegate = ParticleSetupControllerDelegateImpl.createWithOwnerAndCallback(new WeakRef(this), (result: boolean) => resolve(result));
       setupController.delegate = <any>this.wizardDelegate;
       UIApplication.sharedApplication.keyWindow.rootViewController.presentViewControllerAnimatedCompletion(setupController, true, null);
