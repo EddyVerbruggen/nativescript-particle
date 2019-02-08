@@ -1,6 +1,6 @@
 {
   "name": "nativescript-particle",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Control your Particle.io devices from a NativeScript app!",
   "main": "particle",
   "typings": "index.d.ts",
@@ -55,9 +55,9 @@
   "homepage": "https://github.com/EddyVerbruggen/nativescript-particle",
   "readmeFilename": "README.md",
   "devDependencies": {
-    "tns-core-modules": "~4.2.0",
-    "tns-platform-declarations": "~4.2.0",
-    "typescript": "~2.8.2",
+    "tns-core-modules": "~5.1.2",
+    "tns-platform-declarations": "~5.1.2",
+    "typescript": "~3.1.0",
     "prompt": "^1.0.0",
     "rimraf": "^2.6.2",
     "tslint": "^5.11.0",

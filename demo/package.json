@@ -2,17 +2,17 @@
   "nativescript": {
     "id": "org.nativescript.plugindemo.particle",
     "tns-android": {
-      "version": "4.2.0"
+      "version": "5.1.0"
     },
     "tns-ios": {
-      "version": "4.2.0"
+      "version": "5.1.0"
     }
   },
   "dependencies": {
     "nativescript-particle": "file:../src",
     "nativescript-theme-core": "^1.0.4",
     "nativescript-unit-test-runner": "^0.3.4",
-    "tns-core-modules": "~4.2.0"
+    "tns-core-modules": "~5.1.2"
   },
   "devDependencies": {
     "jasmine-core": "^2.5.2",
@@ -24,7 +24,7 @@
     "nativescript-dev-webpack": "~0.15.1",
     "tns-platform-declarations": "~4.2.0",
     "tslint": "~5.4.3",
-    "typescript": "~2.8.2"
+    "typescript": "~3.1.0"
   },
   "scripts": {
     "build.plugin": "cd ../src && npm run build",

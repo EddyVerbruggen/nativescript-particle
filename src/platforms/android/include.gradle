@@ -12,24 +12,24 @@ repositories {
 
 dependencies {
     // for io.particle:cloudsdk
-    compile "com.squareup.retrofit:retrofit:1.9.0"
-    compile "org.greenrobot:eventbus:3.0.0"
-    compile "com.squareup.okhttp:okhttp:2.7.5"
-    compile "com.google.code.gson:gson:2.8.2"
+    implementation "com.squareup.retrofit:retrofit:1.9.0"
+    implementation "org.greenrobot:eventbus:3.0.0"
+    implementation "com.squareup.okhttp:okhttp:2.7.5"
+    implementation "com.google.code.gson:gson:2.8.2"
 
-    compile("io.particle:cloudsdk:0.5.1") {
+    implementation("io.particle:cloudsdk:0.5.1") {
         transitive = false
     }
 
     // for io.particle:devicesetup
-    compile "uk.co.chrisjenx:calligraphy:2.3.0"
-    compile "com.google.dagger:dagger:2.15"
-    compile "com.segment.analytics.android:analytics:4.3.1"
-    compile "com.squareup.phrase:phrase:1.0.3"
-    compile "com.jakewharton:butterknife:8.8.1"
-    compile "com.madgag.spongycastle:core:1.58.0.0"
+    implementation "uk.co.chrisjenx:calligraphy:2.3.0"
+    implementation "com.google.dagger:dagger:2.15"
+    implementation "com.segment.analytics.android:analytics:4.3.1"
+    implementation "com.squareup.phrase:phrase:1.0.3"
+    implementation "com.jakewharton:butterknife:8.8.1"
+    implementation "com.madgag.spongycastle:core:1.58.0.0"
 
-    compile("io.particle:devicesetup:0.6.0") {
+    implementation("io.particle:devicesetup:0.6.0") {
         transitive = false
     }
 }
