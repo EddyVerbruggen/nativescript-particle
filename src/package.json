@@ -55,13 +55,14 @@
   "homepage": "https://github.com/EddyVerbruggen/nativescript-particle",
   "readmeFilename": "README.md",
   "devDependencies": {
-    "tns-core-modules": "~5.1.2",
-    "tns-platform-declarations": "~5.1.2",
-    "typescript": "~3.1.0",
+    "nativescript-dev-webpack": "0.22.0",
     "prompt": "^1.0.0",
     "rimraf": "^2.6.2",
+    "semver": "^5.5.0",
+    "tns-core-modules": "~5.1.2",
+    "tns-platform-declarations": "~5.1.2",
     "tslint": "^5.11.0",
-    "semver": "^5.5.0"
+    "typescript": "~3.1.0"
   },
   "dependencies": {},
   "bootstrapper": "nativescript-plugin-seed"

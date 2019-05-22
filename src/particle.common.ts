@@ -65,6 +65,7 @@ export interface TNSParticleDevice {
   callFunction: (name: string, ...args) => Promise<number>;
   subscribe: (prefix: string, eventHandler: (event: TNSParticleEvent) => void) => void;
   unsubscribe: (prefix: string) => void;
+  unclaim: () => Promise<void>;
 }
 
 export interface TNSParticleLoginOptions {

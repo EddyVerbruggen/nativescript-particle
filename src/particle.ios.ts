@@ -129,6 +129,13 @@ class MyTNSParticleDevice implements TNSParticleDevice {
     this.nativeDevice.unsubscribeFromEventWithID(this.eventIds.get(prefix));
     this.eventIds.delete(prefix);
   }
+
+  unclaim(): Promise<void> {
+    return new Promise<any>((resolve, reject) => {
+      this.nativeDevice.unclaim(
+        error => error ? reject(error.localizedDescription) : resolve());
+    });
+  }
 }
 
 export class Particle implements TNSParticleAPI {
