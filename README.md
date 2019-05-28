@@ -29,11 +29,11 @@ tns plugin add nativescript-particle
 iOS 12 and up requires you to enable 'Access WiFi Information' for your App ID [here](https://developer.apple.com/account/ios/identifier/bundle).
 
 Also, add this to your `App_Resources/iOS/app.entitlements` (mind the name!) file:
- 
+
 ```xml
 <key>com.apple.developer.networking.wifi-info</key>
 <true/>
-``` 
+```
 
 The [demo app](demo) has this:
 
@@ -57,7 +57,7 @@ git clone https://github.com/EddyVerbruggen/nativescript-particle
 cd nativescript-particle/src
 npm i
 npm run demo.ios # or demo.android
-``` 
+```
 
 > Tip: If you get tired entering your login credentials every time you log in, set the [`PARTICLE_USERNAME` and `PARTICLE_PASSWORD` properties to reflect your own](https://github.com/EddyVerbruggen/nativescript-particle/blob/618dea7d0a5d3c1cd9cb287e70142375547faa60/demo/app/main-view-model.ts#L7-L8).
 
@@ -65,7 +65,7 @@ Want to see the demo in action? Check out [this short video 📺](https://www.yo
 
 ## API
 All examples below assume you have these imports and instantiated the `Particle` class:
- 
+
 ```typescript
 import { Particle, TNSParticleDevice, TNSParticleEvent } from "nativescript-particle";
 const particle = new Particle();
@@ -214,7 +214,7 @@ myDevice.getVariable("analogvalue")
 #### `<device>.subscribe`
 You can get notified in your app in case an app on one of your devices publishes an event.
 
-To suppress noise you can filter those events by supplying a prefix, in this case `my-prefix-`, so events like `my-prefix-temp` or `my-prefix-sensorOn` are caught: 
+To suppress noise you can filter those events by supplying a prefix, in this case `my-prefix-`, so events like `my-prefix-temp` or `my-prefix-sensorOn` are caught:
 
 ```typescript
 const myDevice: TNSParticleDevice = null; // you got this from 'listDevices'
@@ -229,6 +229,13 @@ To stop receiving published events from your devices, unsubscribe from the event
 
 ```typescript
 myDevice.unsubscribe("my-prefix-");
+```
+
+#### `<device>.unclaim`
+Removes this device from your account.
+
+```typescript
+myDevice.unclaim();
 ```
 
 ## Thanks!
