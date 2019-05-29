@@ -6,3 +6,5 @@
 
 /// <reference path="./platforms/android/typings/cloudsdk-0.5.1.d.ts" />
 /// <reference path="./platforms/android/typings/devicesetup-0.6.0.d.ts" />
+
+/// <reference path="./typings/custom.d.ts" />

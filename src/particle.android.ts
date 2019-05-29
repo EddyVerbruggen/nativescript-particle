@@ -179,7 +179,9 @@ export class Particle implements TNSParticleAPI {
     return new Promise<boolean>((resolve, reject) => {
       // note that since we _have_ to return an intent, the activity is relaunched, so there's some state juggling required in the app
       const intent = AndroidApp.foregroundActivity.getIntent();
-      io.particle.android.sdk.devicesetup.ParticleDeviceSetupLibrary.init(utils.ad.getApplicationContext());
+
+      io.particle.android.sdk.devicesetup.ParticleDeviceSetupLibrary.init(AndroidApp.foregroundActivity);
+
       const builder = new io.particle.android.sdk.devicesetup.SetupCompleteIntentBuilder({
         buildIntent: (context: globalAndroid.content.Context, setupResult: io.particle.android.sdk.devicesetup.SetupResult): globalAndroid.content.Intent => {
           resolve(setupResult.wasSuccessful());
@@ -187,7 +189,7 @@ export class Particle implements TNSParticleAPI {
         }
       });
 
-      io.particle.android.sdk.devicesetup.ParticleDeviceSetupLibrary.startDeviceSetup(utils.ad.getApplicationContext(), builder);
+      io.particle.android.sdk.devicesetup.ParticleDeviceSetupLibrary.startDeviceSetup(AndroidApp.foregroundActivity, builder);
     });
   }
 

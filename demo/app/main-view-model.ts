@@ -5,7 +5,7 @@ import { prompt } from "tns-core-modules/ui/dialogs";
 
 /************ SET THESE FOR QUICK LOGIN ************/
 const PARTICLE_USERNAME = "eddyverbruggen@gmail.com";
-const PARTICLE_PASSWORD = "";
+const PARTICLE_PASSWORD = "XS4alles";
 /************ ALT LOGIN WITH TOKEN ************/
 const PARTICLE_TOKEN = undefined;
 /************ SET PARTICLE EVENT NAME ************/
@@ -185,7 +185,9 @@ export class HelloWorldModel extends Observable {
 
   startwizard(): void {
     console.log("start wizard tapped");
-    this.particle.startDeviceSetupWizard().then(success => console.log("wizard callback: " + success));
+    this.particle.startDeviceSetupWizard()
+        .then(success => console.log("wizard callback: " + success))
+        .catch(err => console.log("wizard err: " + err));
   }
 
   renameDevice(): void {
