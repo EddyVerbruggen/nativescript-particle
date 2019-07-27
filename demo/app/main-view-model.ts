@@ -5,7 +5,7 @@ import { prompt } from "tns-core-modules/ui/dialogs";
 
 /************ SET THESE FOR QUICK LOGIN ************/
 const PARTICLE_USERNAME = "eddyverbruggen@gmail.com";
-const PARTICLE_PASSWORD = "XS4alles";
+const PARTICLE_PASSWORD = "";
 /************ ALT LOGIN WITH TOKEN ************/
 const PARTICLE_TOKEN = undefined;
 /************ SET PARTICLE EVENT NAME ************/
